@@ -3,21 +3,27 @@ from common import pd, np, plt, galaxies_test
 from helpers import get_best_estimator
 
 
-class Flatness3dEstimator:
-    mean = 0.5
-    deviation = 0
+class InclinationEstimator:
+    x_mean = 0.5
+    x_dev = 0
+    z_mean = 0.9
+    z_dev = 0.05
 
     def __init__(self, x):
-        self.mean = x[0]
-        self.deviation = x[1]
+        self.x_mean = x[0]
+        self.x_dev = x[1]
+        self.z_mean = x[2]
+        self.z_dev = x[3]
 
     def fit(self, target):
         return np.sum(np.square((target - self.bahist())))
     
-    def bahist(self, size=50000):
-        z = np.random.normal(0.9, 0.05, size)
+    def bahist(self, size=10000):
+        z = np.random.normal(self.z_mean, self.z_dev, size)
+        z = np.maximum(0.01, z)
+        z = np.minimum(1, z)
         z2 = z**2
-        x = np.random.normal(self.mean, self.deviation, size)
+        x = np.random.normal(self.x_mean, self.x_dev, size)
         x = np.maximum(0.01, x)
         x = np.minimum(z, x)
         x2 = x**2
@@ -43,41 +49,47 @@ class Flatness3dEstimator:
         return bahist
 
 
-def get_flatness_3d(target):
-    return get_best_estimator(Flatness3dEstimator, ((0, 1), (0, 1)), target, (0.01, 0.01))
+def get_inclination(target):
+    return get_best_estimator(InclinationEstimator, (
+        (0, 0.5), (0, 0.5), (0.8, 1), (0, 0.2)
+    ), target,
+        (0.01, 0.01, 0.01, 0.01)
+    )
 
 
-def compare_flatness_hist(galaxies, parameter, cuts):
+def compare_inclination_hist(galaxies, parameter, cuts):
     quantiles = pd.qcut(galaxies[parameter], cuts, labels=False)
 
     for i in range(len(cuts) - 1):
         hist = np.histogram(galaxies[quantiles == i]["baslot"].values, 100, (0, 100), density=True)[0]
         color = next(plt.gca()._get_lines.prop_cycler)['color']
-        flatness = get_flatness_3d(hist)
+        inclination = get_inclination(hist)
         
         plt.plot(hist, 'o', color=color, label="("+str(round(cuts[i], 2))+", "+str(round(cuts[i+1], 2))+"]")
-        plt.plot(flatness.bahist(100000), color=color, label=("f ~ N(%.2f, %.2f)" % (flatness.mean, flatness.deviation)))
+        plt.plot(inclination.bahist(100000), color=color,
+            label=("f ~ N(%.2f, %.2f), z ~ N(%.2f, %.2f), e = %.2E" %
+            (inclination.x_mean, inclination.x_dev, inclination.z_mean, inclination.z_dev, inclination.fit(hist))))
         
         plt.title(parameter)
         plt.gca().legend()
-        #plt.savefig("plots/flatness_3d_" + parameter + "_hist.png")
+        #plt.savefig("plots/inclination_" + parameter + "_hist.png")
 
 #%%
 if __name__ == '__main__':
-    compare_flatness_hist(galaxies_test, "rmag", (0, 1/2, 1))
+    compare_inclination_hist(galaxies_test, "rmag", (0, 1/2, 1))
 
 #%%
 if __name__ == '__main__':
-    compare_flatness_hist(galaxies_test, "rabsmag", (0, 1/2, 1))
+    compare_inclination_hist(galaxies_test, "rabsmag", (0, 1/2, 1))
 
 #%%
 if __name__ == '__main__':
-    compare_flatness_hist(galaxies_test, "redshift", (0, 1/2, 1))
+    compare_inclination_hist(galaxies_test, "redshift", (0, 1/2, 1))
 
 #%%
 if __name__ == '__main__':
-    compare_flatness_hist(galaxies_test, "rad", (0, 1/2, 1))
+    compare_inclination_hist(galaxies_test, "rad", (0, 1/2, 1))
 
 #%%
 if __name__ == '__main__':
-    compare_flatness_hist(galaxies_test, "sern", (0, 1/2, 1))
+    compare_inclination_hist(galaxies_test, "sern", (0, 1/2, 1))

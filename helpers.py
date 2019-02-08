@@ -2,7 +2,10 @@ import numpy as np
 
 
 def get_best_estimator(Estimator, bounds, target, epsilon, density=5, max_iterations=10):
-    x = [np.linspace(b[0], b[1], density) for b in bounds]
+    if isinstance(density, int):
+        density = np.repeat(density, len(bounds))
+
+    x = [np.linspace(b[0], b[1], density[i]) for i, b in enumerate(bounds)]
     grid = np.array(np.meshgrid(*x)).T.reshape(-1, len(bounds))
     
     best_x = None
@@ -21,10 +24,12 @@ def get_best_estimator(Estimator, bounds, target, epsilon, density=5, max_iterat
         new_bounds = []
 
         for i, x in enumerate(best_x):
-            step = (bounds[i][1] - bounds[i][0])/density
+            step = (bounds[i][1] - bounds[i][0])/density[i]
             
             if step > epsilon[i]:
                 done = False
+            else:
+                density[i] = 1
 
             new_bounds.append([
                 max(bounds[i][0], x - step),
