@@ -45,3 +45,7 @@ def get_best_estimator(Estimator, bounds, target, epsilon, density=5, max_iterat
 
 def get_truncnorm_sample(mu, sigma, a, b, N):
     return truncnorm.rvs((a - mu)/sigma, (b - mu)/sigma, loc=mu, scale=sigma, size=N)
+
+
+def get_truncnorm_pdf(x, mu, sigma, a, b):
+    return truncnorm.pdf(x, (a - mu)/sigma, (b - mu)/sigma, loc=mu, scale=sigma)
