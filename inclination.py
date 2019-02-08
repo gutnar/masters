@@ -1,6 +1,10 @@
 #%%
 from common import pd, np, plt, galaxies_test
-from helpers import get_best_estimator
+from helpers import get_best_estimator, get_truncnorm_sample
+
+
+def get_inclination_sample(mu, sigma, N):
+    return get_truncnorm_sample(mu, sigma, 0, 1, N)
 
 
 class InclinationEstimator:
@@ -19,11 +23,12 @@ class InclinationEstimator:
         return np.sum(np.square((target - self.bahist())))
     
     def bahist(self, size=10000):
-        z = np.random.normal(self.z_mean, self.z_dev, size)
+        #z = np.random.normal(self.z_mean, self.z_dev, size)
+        z = get_inclination_sample(self.z_mean, self.z_dev, size)
         z = np.maximum(0.01, z)
-        z = np.minimum(1, z)
         z2 = z**2
-        x = np.random.normal(self.x_mean, self.x_dev, size)
+        #x = np.random.normal(self.x_mean, self.x_dev, size)
+        x = get_inclination_sample(self.x_mean, self.x_dev, size)
         x = np.maximum(0.01, x)
         x = np.minimum(z, x)
         x2 = x**2
@@ -51,7 +56,7 @@ class InclinationEstimator:
 
 def get_inclination(target):
     return get_best_estimator(InclinationEstimator, (
-        (0, 0.5), (0, 0.5), (0.8, 1), (0, 0.2)
+        (0, 0.5), (0, 0.5), (0.8, 1), (0, 0.3)
     ), target,
         (0.01, 0.01, 0.01, 0.01)
     )

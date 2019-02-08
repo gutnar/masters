@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.stats import truncnorm
 
 
 def get_best_estimator(Estimator, bounds, target, epsilon, density=5, max_iterations=10):
@@ -40,3 +41,7 @@ def get_best_estimator(Estimator, bounds, target, epsilon, density=5, max_iterat
             return get_best_estimator(Estimator, new_bounds, target, epsilon, density, max_iterations - 1)
     
     return best_estimator
+
+
+def get_truncnorm_sample(mu, sigma, a, b, N):
+    return truncnorm.rvs((a - mu)/sigma, (b - mu)/sigma, loc=mu, scale=sigma, size=N)
