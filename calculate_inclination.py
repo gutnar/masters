@@ -29,7 +29,7 @@ if __name__ == '__main__':
     from common import np, plt, galaxies, galaxies_train, parameters
     from classifier import clf
 
-    sample = galaxies[:150]
+    sample = galaxies[:5000]
     print(sample.describe())
 
     processes = cpu_count() - 1

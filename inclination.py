@@ -18,7 +18,7 @@ class InclinationEstimator:
     def fit(self, target):
         return np.sum(np.square((target - self.bahist())))
     
-    def sample_x(self, size=1):
+    def sample_x(self, size):
         return get_truncnorm_sample(self.x_mean, self.x_dev, 0, 1, size)
     
     def sample_z(self, size=1):
@@ -57,7 +57,7 @@ class InclinationEstimator:
 
 def get_inclination(target):
     return get_best_estimator(InclinationEstimator, (
-        (0.01, 0.5), (0.01, 0.5), (0.8, 1), (0.01, 0.3)
+        (0.01, 0.5), (0.01, 0.5), (0.8, 1), (0.01, 0.1)
     ), target, (0.01, 0.01, 0.01, 0.01))
 
 
