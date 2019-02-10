@@ -1,3 +1,4 @@
+#%%
 from inclination import get_inclination
 from helpers import get_truncnorm_pdf
 from time import time, sleep
@@ -29,7 +30,7 @@ if __name__ == '__main__':
     from common import np, plt, galaxies, galaxies_train, parameters
     from classifier import clf
 
-    sample = galaxies[:5000]
+    sample = galaxies[:100]
     print(sample.describe())
 
     processes = cpu_count() - 1

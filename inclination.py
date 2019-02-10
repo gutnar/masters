@@ -5,7 +5,7 @@ from helpers import get_best_estimator, get_truncnorm_sample
 
 class InclinationEstimator:
     x_mean = 0.5
-    x_dev = 0
+    x_dev = 0.1
     z_mean = 0.9
     z_dev = 0.05
 
@@ -28,7 +28,7 @@ class InclinationEstimator:
         x = self.sample_x(size)
         z = self.sample_z(size)
 
-        x = np.minimum(x, z)
+        #x = np.minimum(x, z)
         #z = np.maximum(x, z)
 
         x2 = x**2
@@ -57,8 +57,11 @@ class InclinationEstimator:
 
 def get_inclination(target):
     return get_best_estimator(InclinationEstimator, (
-        (0.01, 0.5), (0.01, 0.5), (0.8, 1), (0.01, 0.1)
+        (0.01, 0.51), (0.01, 0.51), (0.8, 1), (0.01, 0.11)
     ), target, (0.01, 0.01, 0.01, 0.01))
+    #return get_best_estimator(InclinationEstimator, (
+    #    (0.01, 0.5), (0.7, 1)
+    #), target, (0.01, 0.01))
 
 
 def compare_inclination_hist(galaxies, parameter, cuts):
@@ -77,6 +80,10 @@ def compare_inclination_hist(galaxies, parameter, cuts):
         plt.title(parameter)
         plt.gca().legend()
         #plt.savefig("plots/inclination_" + parameter + "_hist.png")
+
+#%%
+if __name__ == '__main__':
+    compare_inclination_hist(galaxies_test, "rmag", (0, 1))
 
 #%%
 if __name__ == '__main__':
