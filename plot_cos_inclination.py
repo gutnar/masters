@@ -3,10 +3,11 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from sympy import Symbol, symbols, sqrt, solve, Eq, cos, sin
-from scipy.optimize import fsolve, differential_evolution
+from scipy.optimize import fsolve, differential_evolution, brute
 from helpers import get_truncnorm_sample
 from time import time
 from multiprocessing import Pool
+from os import cpu_count
 
 t = Symbol("t", positive=True)
 p = Symbol("p", positive=True)
@@ -33,21 +34,58 @@ def test_cos_t(cos, x_value, z_value, q_value):
         p: cos[1]
     })
 
-def process_galaxies(data):
-    pass
+
+def process_galaxy(galaxy):
+    ba = float(galaxy["ba"])
+    x = get_truncnorm_sample(galaxy["x_mu"], galaxy["x_sigma"], 0, 1, 1)[0]
+    z = get_truncnorm_sample(galaxy["z_mu"], galaxy["z_sigma"], 0, 1, 1)[0]
+
+    try:
+        cos = differential_evolution(test_cos_t, ((0, 1), (0, 1)), (x, z, ba), 'best1bin', 1).x
+    except TypeError:
+        cos = [0, 0]
+    
+    '''
+    try:
+        cos = [np.sqrt((ba**2 * z**2 - x**2) / (1 - x**2)), 0]
+    except RuntimeWarning:
+        cos = [0, 0]
+    '''
+
+    return pd.Series({
+        "cos_t": cos[0],
+        "cos_p": cos[1]
+    })
+
+
+def process_galaxies(galaxies):
+    return galaxies.apply(process_galaxy, axis=1, result_type="reduce")
 
 #%%
-galaxies = pd.read_csv("data_inclinations.1000.txt")
-galaxies.describe()
+if __name__ == '__main__':
+    galaxies = pd.read_csv("data_inclinations.5000.txt")
 
-plt.hist(galaxies[:100]["baslot"], 100, (0, 100))
+    sample = galaxies
+    print(sample.describe())
 
+    processes = cpu_count() - 1
+    chunks = np.array_split(sample, processes)
+
+    start = time()
+    pool = Pool(processes)
+    angles = pd.concat(pool.map(process_galaxies, chunks))
+    print(time() - start)
+
+    angles.to_csv("angles.txt", index=False)
+
+#%%
+'''
 #%%
 start = time()
 sample_size = 1
 cos_samples = []
 
-for i in range(100):
+for i in range(1000):
     galaxy = galaxies.iloc[[i]]
     ba = float(galaxy["ba"])
 
@@ -59,18 +97,6 @@ for i in range(100):
     #x = np.minimum(x, ba*z)
     #cos_x = np.sqrt((ba**2 * z**2 - x**2) / (1 - x**2))
 
-    '''
-    cos_t_samples += [
-        fsolve(lambda test_t: E.subs({
-            p: sample_p[i],
-            x: sample_x[i],
-            z: sample_z[i],
-            q: ba,
-            t: test_t
-        }), 0.5) for i in range(sample_size)
-    ]
-    '''
-
     cos_samples += [
         differential_evolution(
             test_cos_t, ((0, 1), (0, 1)),
@@ -79,7 +105,6 @@ for i in range(100):
         ).x
         for i in range(sample_size)
     ]
-
 cos_t_samples = [cos[0] for cos in cos_samples]
 cos_t_pdf = np.histogram(np.array(cos_t_samples), 100, (0, 1))[0]
 #cos_t_pdf = cos_t_pdf[1:]
@@ -99,7 +124,10 @@ plt.plot(cos_t_pdf)
 print(time() - start)
 
 #%%
-g = galaxies.iloc[[0]]
+plt.plot(cos_t_pdf[1:99])
+
+#%%
+g = galaxies.iloc[[15]]
 
 start = time()
 #print(fsolve(test_cos_t, [0.5, 0.5], args=(0.32, 0.89, 0.40)))
@@ -115,3 +143,4 @@ print(differential_evolution(
 print(time() - start)
 
 # (0.23, 0.72)
+'''
