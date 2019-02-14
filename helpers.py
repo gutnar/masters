@@ -70,26 +70,3 @@ def sample_ba_hist(hist, N=1):
     return np.array([
         np.random.uniform(slot * 0.01, (slot + 1) * 0.01) for slot in slots
     ])
-
-
-def get_ba(x, z):
-    N = len(x)
-
-    x2 = x**2
-    z2 = z**2
-
-    cos_t = np.random.uniform(0, 1, N)
-    cos2_t = cos_t**2
-    sin2_t = 1 - cos2_t
-
-    cos_p = np.random.uniform(0, 1, N)
-    cos2_p = cos_p**2
-    sin2_p = 1 - cos2_p
-    sin_2p = 2*np.sqrt(sin2_p)*np.sqrt(cos2_p)
-
-    A = cos2_t/x2 * (sin2_p + cos2_p/z2) + sin2_t/z2
-    B = (1 - 1/z2) * 1/x2 * cos_t * sin_2p
-    C = (sin2_p/z2 + cos2_p)/x2
-    D = np.sqrt((A - C)**2 + B**2)
-
-    return np.sqrt((A + C - D) / (A + C + D))

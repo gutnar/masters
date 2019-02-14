@@ -2,56 +2,32 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from helpers import get_truncnorm_sample
+from helpers import get_truncnorm_sample, get_ba
 from sklearn.ensemble import RandomForestClassifier
 from time import time
 from multiprocessing import Pool
 from os import cpu_count
 
-
-def get_ba_hist(x, z, N):
-    x2 = x**2
-    z2 = z**2
-
-    cos_t = np.random.uniform(0, 1, N)
-    cos2_t = cos_t**2
-    sin2_t = 1 - cos2_t
-
-    cos_p = np.random.uniform(0, 1, N)
-    cos2_p = cos_p**2
-    sin2_p = 1 - cos2_p
-    sin_2p = 2*np.sqrt(sin2_p)*np.sqrt(cos2_p)
-
-    A = cos2_t/x2 * (sin2_p + cos2_p/z2) + sin2_t/z2
-    B = (1 - 1/z2) * 1/x2 * cos_t * sin_2p
-    C = (sin2_p/z2 + cos2_p)/x2
-    D = np.sqrt((A - C)**2 + B**2)
-
-    ba = np.sqrt((A + C - D) / (A + C + D))
-    #baslot = np.ceil(ba * 100) - 1
-    ba_hist = np.histogram(ba, 100, (0, 1))[0] / N
-
-    return ba_hist
-
 #%%
 ba_columns = ["ba" + str(i) for i in range(100)]
 columns = ["x_slot", "z_slot"] + ba_columns
-X_step = 0.005
-Z_step = 0.005
+X_bins = np.linspace(0, 0.4, 80 + 1)
+Z_bins = np.linspace(0.8, 1, 40 + 1)
 
 def generate(N):
     df = pd.DataFrame([], columns=columns)
 
-    for X in np.linspace(0, 0.5, 100, endpoint=False):
-        for Z in np.linspace(0.75, 1, 50, endpoint=False):
-            x = np.random.uniform(X, X + X_step, N)
-            z = np.random.uniform(Z, Z + Z_step, N)
-            ba_hist = get_ba_hist(x, z, N)
+    for X in range(len(X_bins) - 1):
+        for Z in range(len(Z_bins) - 1):
+            x = np.random.uniform(X_bins[X], X_bins[X+1], N)
+            z = np.random.uniform(Z_bins[Z], Z_bins[Z+1], N)
+            ba = get_ba(x, z)
+            ba_hist = np.histogram(ba, 100, (0, 1), density=True)[0]
 
             df = df.append(
                 pd.DataFrame(
                     [np.concatenate((
-                        np.array([int(X/X_step), int((Z-0.75)/Z_step)]), ba_hist
+                        np.array([X, Z]), ba_hist
                     ))],
                     columns=columns
                 )
@@ -63,8 +39,11 @@ def generate(N):
 if __name__ == '__main__':
     start = time()
     pool = Pool(cpu_count() - 1)
-    df = pd.concat(pool.map(generate, np.repeat(1000, 10)))
+    df = pd.concat(pool.map(generate, np.repeat(1000, 20)))
     print(time() - start)
+
+    df["x_slot"] = df["x_slot"].astype(int)
+    df["z_slot"] = df["z_slot"].astype(int)
     
     print(df.describe())
     df.to_csv("data_generated.txt", index=False)

@@ -31,6 +31,8 @@ print(result)
 #success: False
 #    x: array([0.29141139, 0.23187484, 0.93228061, 0.07318355])
 
+# test set array([0.27460574, 0.24335764, 0.92117144, 0.0753965 ])
+
 #%%
 x = get_truncnorm_sample(result.x[0], result.x[1], 0, 1, 10000)
 z = get_truncnorm_sample(result.x[2], result.x[3], 0, 1, 10000)
