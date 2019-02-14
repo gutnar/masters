@@ -1,5 +1,5 @@
 #%%
-from inclination import get_inclination
+from inclination import estimate_inclination
 from helpers import get_truncnorm_pdf
 from time import time, sleep
 from multiprocessing import Pool
@@ -11,14 +11,14 @@ warnings.filterwarnings("ignore")
 
 
 def process_galaxy(galaxy, clf):
-    hist = clf.predict_proba([galaxy.values])
-    inclination = get_inclination(hist)
+    pdf = np.concatenate([clf.predict_proba([galaxy.values]), np.array([0])]) / 0.005
+    result = estimate_inclination(pdf)
 
     return pd.Series({
-        "x_mu": inclination.x_mean,
-        "x_sigma": inclination.x_dev,
-        "z_mu": inclination.z_mean,
-        "z_sigma": inclination.z_dev
+        "x_mu": result[0],
+        "x_sigma": result[1],
+        "z_mu": result[2],
+        "z_sigma": result[3]
     })
 
 
