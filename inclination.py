@@ -19,10 +19,10 @@ def get_ba(x, z):
     cos2_t = cos_t**2
     sin2_t = 1 - cos2_t
 
-    cos_p = np.cos(np.random.uniform(0, np.pi, N))
-    cos2_p = cos_p**2
-    sin2_p = 1 - cos2_p
-    sin_2p = 2*np.sqrt(sin2_p)*np.sqrt(cos2_p)
+    p = np.random.uniform(0, 2*np.pi, N)
+    cos2_p = np.cos(p)**2
+    sin2_p = np.sin(p)**2
+    sin_2p = np.sin(2*p)
 
     A = cos2_t/x2 * (sin2_p + cos2_p/z2) + sin2_t/z2
     B = (1 - 1/z2) * 1/x2 * cos_t * sin_2p

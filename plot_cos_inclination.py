@@ -15,47 +15,32 @@ x = Symbol("x", positive=True)
 z = Symbol("z", positive=True)
 q = Symbol("q", positive=True)
 
-A = t**2 / x**2 * (1 - p**2 + p**2 / z**2) + (1 - t**2) / z**2
-B = (1 - 1/z**2) * 1/x**2 * t * 2 * sqrt(1 - p**2) * p
-C = ((1 - p**2)/z**2 + p**2) / x**2
+A = t**2 / x**2 * (sin(p)**2 + cos(p)**2 / z**2) + (1 - t**2) / z**2
+B = (1 - 1/z**2) * 1/x**2 * t * sin(2*p)
+C = (sin(p)**2/z**2 + cos(p)**2) / x**2
 D = sqrt((A - C)**2 + B**2)
 E = (A + C - D) - q**2 * (A + C + D)
 E2 = E**2
 
-def test_cos_t(cos, x_value, z_value, q_value):
-    #print(p_value, x_value, z_value, q_value, cos_t[0])
-    #print(E.evalf(subs={ p: p_value, x: x_value, z: z_value, q: q_value, t: cos_t[0] }))
+def test_cos_t(cos, p_value, x_value, z_value, q_value):
     return E2.subs({
-        #p: p_value,
+        t: cos[0],
+        p: p_value,
         x: x_value,
         z: z_value,
-        q: q_value,
-        t: cos[0],
-        p: cos[1]
+        q: q_value
     })
 
 
 def process_galaxy(galaxy):
     ba = float(galaxy["ba"])
-    x = get_truncnorm_sample(galaxy["x_mu"], galaxy["x_sigma"], 0, 1, 1)[0]
-    z = get_truncnorm_sample(galaxy["z_mu"], galaxy["z_sigma"], 0, 1, 1)[0]
+    x = get_truncnorm_sample(galaxy["x_mu"], galaxy["x_sigma"], 0, ba, 1)[0]
+    z = get_truncnorm_sample(galaxy["z_mu"], galaxy["z_sigma"], ba, 1, 1)[0]
+    p = np.random.uniform(0, 2*np.pi, 1)[0]
 
-    try:
-        cos = differential_evolution(test_cos_t, ((0, 1), (0, 1)), (x, z, ba), 'best1bin', 1).x
-    except TypeError:
-        cos = [0, 0]
-    
-    '''
-    try:
-        cos = [np.sqrt((ba**2 * z**2 - x**2) / (1 - x**2)), 0]
-    except RuntimeWarning:
-        cos = [0, 0]
-    '''
-
-    return pd.Series({
-        "cos_t": cos[0],
-        "cos_p": cos[1]
-    })
+    return differential_evolution(
+        test_cos_t, [(0, 1)], (p, x, z, ba), 'best1bin', 1
+    ).x[0]
 
 
 def process_galaxies(galaxies):
@@ -63,7 +48,7 @@ def process_galaxies(galaxies):
 
 #%%
 if __name__ == '__main__':
-    galaxies = pd.read_csv("data_inclinations.5000.txt")
+    galaxies = pd.read_csv("data_inclinations.txt")
 
     sample = galaxies
     print(sample.describe())
