@@ -15,13 +15,13 @@ warnings.filterwarnings("ignore")
 
 
 def process_galaxy(galaxy, clf, parameters, sample_pdf):
-    pdf = np.concatenate([clf.predict_proba([galaxy[parameters].values])[0], np.array([0])]) / 0.005
+    pdf = clf.predict_proba([galaxy[parameters].values])[0] / 0.01
     smooth = savgol_filter(pdf, 31, 3)
     baslot = int(galaxy["baslot"])
 
     return pd.Series({
-        "sample": (sample_pdf[baslot] + smooth[baslot + 1]) / 2 * 0.005,
-        "classifier": (smooth[baslot] + smooth[baslot + 1]) / 2 * 0.005
+        "sample": (sample_pdf[baslot] + smooth[baslot + 1]) / 2 * 0.01,
+        "classifier": (smooth[baslot] + smooth[baslot + 1]) / 2 * 0.01
     })
 
 
@@ -38,7 +38,7 @@ if __name__ == '__main__':
 
     kde = sm.nonparametric.KDEUnivariate(sample["ba"])
     kde.fit()
-    sample_pdf = kde.evaluate(np.linspace(0, 1, 101))
+    sample_pdf = kde.evaluate(np.linspace(0, 1, 100))
 
     processes = cpu_count() - 1
     chunks = np.array_split(sample, processes)

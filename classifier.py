@@ -25,17 +25,17 @@ galaxies_test = galaxies[~training_set]
 #%% Train classifier
 parameters = ["rmag", "rabsmag", "redshift", "rad", "sern"]
 
-#clf = RandomForestClassifier(
-#    criterion="gini",
-#    n_estimators=64,
-#    #max_depth=10,
-#    min_samples_split=10,
-#    min_samples_leaf=50,
-#    max_features=None,
-#    n_jobs=-1
-#)
+clf = RandomForestClassifier(
+    criterion="gini",
+    n_estimators=64,
+    #max_depth=10,
+    min_samples_split=10,
+    min_samples_leaf=50,
+    max_features=None,
+    n_jobs=-1
+)
 
-clf = KNeighborsClassifier(10)
+#clf = KNeighborsClassifier(10)
 
 X_train = galaxies_train[parameters].values
 Y_train = galaxies_train["baslot"].values

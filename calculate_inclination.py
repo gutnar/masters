@@ -4,6 +4,7 @@ from helpers import get_truncnorm_pdf
 from time import time, sleep
 from multiprocessing import Pool
 from os import cpu_count
+import numpy as np
 import pandas as pd
 import warnings
 
@@ -11,7 +12,7 @@ warnings.filterwarnings("ignore")
 
 
 def process_galaxy(galaxy, clf):
-    pdf = np.concatenate([clf.predict_proba([galaxy.values]), np.array([0])]) / 0.005
+    pdf = clf.predict_proba([galaxy.values])[0] / 0.01
     result = estimate_inclination(pdf)
 
     return pd.Series({
@@ -27,10 +28,9 @@ def process_galaxies(data):
 
 
 if __name__ == '__main__':
-    from common import np, plt, galaxies, galaxies_train, parameters
-    from classifier import clf
+    from classifier import galaxies_test, clf, parameters
 
-    sample = galaxies[:100]
+    sample = galaxies_test[:1000]
     print(sample.describe())
 
     processes = cpu_count() - 1
@@ -38,7 +38,9 @@ if __name__ == '__main__':
 
     start = time()
     pool = Pool(processes)
-    inclinations = pd.concat(pool.map(process_galaxies, [{ "clf": clf, "galaxies": chunk[parameters] } for chunk in chunks]))
+    inclinations = pd.concat(pool.map(process_galaxies, [{
+        "clf": clf, "galaxies": chunk[parameters]
+    } for chunk in chunks]))
     print(time() - start)
 
     data = pd.concat([sample, inclinations], axis=1, sort=False)

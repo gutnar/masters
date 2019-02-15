@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 from scipy.stats import truncnorm
 
 
@@ -49,6 +50,14 @@ def get_truncnorm_sample(mu, sigma, a, b, N):
 
 def get_truncnorm_pdf(x, mu, sigma, a, b):
     return truncnorm.pdf(x, (a - mu)/sigma, (b - mu)/sigma, loc=mu, scale=sigma)
+
+
+def plot_truncnorm_pdf(mu, sigma, a, b, **kwargs):
+    x = np.linspace(a, b, 100)
+    a_norm, b_norm = (a - mu) / sigma, (b - mu) / sigma
+    rv = truncnorm(a_norm, b_norm)
+    x_norm = np.linspace(a_norm, b_norm, 100)
+    plt.plot(x, rv.pdf(x_norm), **kwargs)
 
 
 def sample_x_slot(slot, N=1):

@@ -1,5 +1,5 @@
 #%%
-from helpers import get_truncnorm_sample
+from helpers import get_truncnorm_sample, plot_truncnorm_pdf
 from scipy import stats
 from time import time
 from scipy.optimize import differential_evolution
@@ -19,7 +19,7 @@ def get_ba(x, z):
     cos2_t = cos_t**2
     sin2_t = 1 - cos2_t
 
-    cos_p = np.random.uniform(0, 1, N)
+    cos_p = np.cos(np.random.uniform(0, np.pi, N))
     cos2_p = cos_p**2
     sin2_p = 1 - cos2_p
     sin_2p = 2*np.sqrt(sin2_p)*np.sqrt(cos2_p)
@@ -41,13 +41,13 @@ def test_parameters(parameters, target, N):
     kde.fit()
     ba_hist = kde.evaluate(np.linspace(0, 1, 100) + 0.005)
 
-    return np.sum(np.abs((target - ba_hist)))
+    return np.sum(np.square((target - ba_hist)))
 
 
 def estimate_inclination(hist, plot=False, plot_color=None, plot_label=None):
     result = differential_evolution(test_parameters, (
-        (0.01, 0.4), (0, 0.25), (0.85, 0.99), (0, 0.1)
-    ), args=(hist, 1000), maxiter=50).x
+        (0.01, 0.4), (0.001, 0.25), (0.85, 0.99), (0.001, 0.1)
+    ), args=(hist, 1000), maxiter=10).x
 
     if plot:
         x = get_truncnorm_sample(result[0], result[1], 0, 1, 10000)
@@ -69,6 +69,8 @@ def plot_quantile_inclination_results(galaxies, parameter, cuts):
     quantiles = pd.qcut(galaxies[parameter], cuts, labels=False)
 
     for i in range(len(cuts) - 1):
+        plt.figure(1)
+
         hist = np.histogram(galaxies[quantiles == i]["ba"].values, 100, (0, 1), density=True)[0]
         color = next(plt.gca()._get_lines.prop_cycler)['color']
 
@@ -76,9 +78,17 @@ def plot_quantile_inclination_results(galaxies, parameter, cuts):
         result = estimate_inclination(hist, True, color, "("+str(round(cuts[i], 2))+", "+str(round(cuts[i+1], 2))+"] "+parameter)
         print(time() - start, result)
 
-        plt.title(parameter)
-        plt.gca().legend()
-        plt.savefig("plots/inclination_" + parameter + "_hist.png")
+        plt.figure(2)
+        plot_truncnorm_pdf(result[0], result[1], 0, 1, color=color, label="x ~ N(%.2f, %.2f)" % (result[0], result[1]))
+        plot_truncnorm_pdf(result[2], result[3], 0, 1, color=color, linestyle="--", label="z ~ N(%.2f, %.2f)" % (result[2], result[3]))
+
+    plt.figure(1)
+    plt.title(parameter)
+    plt.gca().legend()
+    plt.savefig("plots/inclination_" + parameter + "_hist.png")
+
+    plt.figure(2)
+    plt.gca().legend()
 
 
 #%%
