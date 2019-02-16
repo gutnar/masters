@@ -47,7 +47,7 @@ def test_parameters(parameters, target, N):
 def estimate_inclination(hist, plot=False, plot_color=None, plot_label=None):
     result = differential_evolution(test_parameters, (
         (0.01, 0.4), (0.001, 0.25), (0.85, 0.99), (0.001, 0.1)
-    ), args=(hist, 1000), maxiter=10).x
+    ), args=(hist, 1000), maxiter=5).x
 
     if plot:
         x = get_truncnorm_sample(result[0], result[1], 0, 1, 10000)
