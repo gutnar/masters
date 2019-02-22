@@ -47,7 +47,7 @@ def test_parameters(parameters, target, N):
 
 def estimate_inclination(hist, plot=False, plot_color=None, plot_label=None):
     result = differential_evolution(test_parameters, (
-        (0.01, 0.70), (0.001, 0.25), (0.75, 0.999), (0.001, 0.15)
+        (0.01, 0.9999), (0, 0.5), (0.5, 0.9999), (0, 0.25)
     ), args=(hist, 1000), maxiter=25).x
 
     if plot:

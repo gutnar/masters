@@ -40,7 +40,7 @@ if __name__ == '__main__':
     processes = 4#cpu_count() - 1
 
     start = time()
-    pdfs = clf.predict_proba(sample[parameters].values)
+    pdfs = clf.predict_proba(sample[parameters].values) / 0.01
     #chunks = np.array_split(sample, processes)
     chunks = np.array_split(pdfs, processes)
     print(time() - start, "predict_proba")

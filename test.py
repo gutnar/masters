@@ -10,27 +10,41 @@ from multiprocessing import Pool
 from os import cpu_count
 import statsmodels.api as sm
 
-inclinations = sum([
-    [
-        [0.01234958, 0.00923403, 0.97634919, 0.00111584],
-        [0.01797638, 0.02303374, 0.97349781, 0.03035275],
-        [0.03318095, 0.01287478, 0.98187451, 0.00750664]
-    ], [
-        [0.0167513 , 0.02986062, 0.98764488, 0.02340807],
-        [0.02383499, 0.01394882, 0.97818459, 0.01015622], 
-        [0.01595973, 0.00773543, 0.98498279, 0.00717259]
-    ], [
-        [0.02458909, 0.01763566, 0.98535531, 0.02357705],
-        [0.01724567, 0.00417566, 0.98018954, 0.0741385 ]
-    ], [
-        [0.02012741, 0.00739975, 0.9752773 , 0.01528026],
-        [0.02374853, 0.02678782, 0.98501453, 0.04491906]
-    ]
-], [])
+#%%
+plot_truncnorm_pdf(0.5, 0.25, 0, 1)
+plot_truncnorm_pdf(0.5, 0.25, 0, 0.1)
 
-sample = pd.DataFrame.from_records(inclinations, columns=("a", "b", "c", "d"))
-inclinations = pd.DataFrame.from_records(inclinations, columns=("x_mu", "x_sigma", "z_mu", "z_sigma"))
-pd.concat([sample, inclinations], axis=1, sort=False)
+#%%
+from classifier import clf, parameters
+from inclination import estimate_inclination
+
+galaxies = pd.read_csv("data_inclinations.txt")
+
+#%%
+sorted_galaxies = galaxies.sort_values(by=["x_mu"], ascending=True)
+galaxy = sorted_galaxies.iloc[[50]]
+
+pdf = clf.predict_proba(galaxy[parameters].values)[0] / 0.01
+result = estimate_inclination(pdf, True)
+
+galaxy, result
+
+#%%
+from inclination import sample_cos_t
+
+galaxy = galaxies.iloc[[9000]]
+
+cos_t = sample_cos_t(
+    float(galaxy["ba"]),
+    float(galaxy["x_mu"]),
+    float(galaxy["x_sigma"]),
+    float(galaxy["z_mu"]),
+    float(galaxy["z_sigma"]),
+    10000
+)
+
+plt.hist(cos_t, 100, (0, 1))
+galaxy
 
 #%%
 from inclination import get_ba
@@ -53,12 +67,12 @@ if __name__ == '__main__':
     plt.hist(cos_t, 100)
 
 #%%
-from symbolic import test_cos_t
+from inclination import sample_cos_t
 
 if __name__ == '__main__':
     galaxies = pd.read_csv("data_inclinations.txt")
 
-    sample = galaxies[:100]
+    sample = galaxies
     print(sample.describe())
 
     #plt.figure(1)
@@ -75,36 +89,27 @@ if __name__ == '__main__':
 
     for i in range(len(sample)):
         galaxy = sample.iloc[[i]]
-        ba = float(galaxy["ba"])
-
-        N = 1
-        x = get_truncnorm_sample(galaxy["x_mu"], galaxy["x_sigma"], 0, ba, N)
-        z = get_truncnorm_sample(galaxy["z_mu"], galaxy["z_sigma"], ba, 1, N)
-        p = np.random.uniform(0, 2*np.pi, N)
-
-        cos_t = np.array([
-            #fsolve(test_cos_t, 0.5, (p[i], x[i], z[i], ba))[0]
-            differential_evolution(test_cos_t, [
-                (0, 1)
-            ], args=(p[i], x[i], z[i], ba), maxiter=1).x[0]
-            for i in range(N)
-        ])
         
         cos_t_samples = np.concatenate([
             cos_t_samples,
-            #np.sqrt((ba**2 - x**2) / (1 - x**2))
-            cos_t
+            sample_cos_t(
+                float(galaxy["ba"]),
+                float(galaxy["x_mu"]),
+                float(galaxy["x_sigma"]),
+                float(galaxy["z_mu"]),
+                float(galaxy["z_sigma"]),
+                10
+            )
         ])
     
     print(time() - start)
 
-    plt.hist(cos_t_samples, 100, (0, 1), density=True)
-    
-    kde = sm.nonparametric.KDEUnivariate(cos_t_samples)
-    kde.fit()
-    plt.plot(kde.support, kde.density)
+#%%
+plt.hist(cos_t_samples, 100, (0, 1), density=True)
 
-    #angles.to_csv("angles.txt", index=False)
+kde = sm.nonparametric.KDEUnivariate(cos_t_samples)
+kde.fit()
+plt.plot(kde.support, kde.density)
 
 #%%
 cos_t_samples = pd.read_csv("angles.txt")
