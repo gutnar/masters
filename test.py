@@ -31,6 +31,7 @@ galaxy, result
 
 #%%
 from inclination import sample_cos_t
+from scipy.stats import truncnorm
 
 galaxy = galaxies.iloc[[9000]]
 
@@ -44,7 +45,6 @@ cos_t = sample_cos_t(
 )
 
 plt.hist(cos_t, 100, (0, 1))
-galaxy
 
 #%%
 from inclination import get_ba
