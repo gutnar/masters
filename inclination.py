@@ -102,12 +102,14 @@ expression = sqrt(q**2*x**2*z**2*sin(p)**2/2 - q**2*x**2*z**2/2 - q**2*x**2*sin(
 cos_t = lambdify([p, x, z, q], expression, "numpy")
 
 def sample_cos_t(ba, x_mu, x_sigma, z_mu, z_sigma, N):
-    return cos_t(
+    samples = cos_t(
         np.random.uniform(0, 2*np.pi, N),
         get_truncnorm_sample(x_mu, x_sigma, 0, ba, N),
         get_truncnorm_sample(z_mu, z_sigma, ba, 1, N),
         ba
     )
+
+    return samples
 
 #%%
 if __name__ == '__main__':

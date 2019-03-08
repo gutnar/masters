@@ -11,8 +11,11 @@ from os import cpu_count
 import statsmodels.api as sm
 
 #%%
-plot_truncnorm_pdf(0.5, 0.25, 0, 1)
-plot_truncnorm_pdf(0.5, 0.25, 0, 0.1)
+gama = pd.read_csv("data/raw/gama_data_for_gutnar.txt", sep=r"\s+")
+inclinations = pd.read_csv("data/intermediate/inclinations.txt")
+
+combined = gama.merge(inclinations, on="id", how="inner")
+combined.describe()
 
 #%%
 from classifier import clf, parameters
