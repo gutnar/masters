@@ -112,7 +112,7 @@ def sample_cos_t(ba, x_mu, x_sigma, z_mu, z_sigma, N):
 #%%
 if __name__ == '__main__':
     plt.rcParams['figure.figsize'] = [16, 5]
-    galaxies = pd.read_csv("data_gama_gal_orient.txt", sep=r"\s+")
+    galaxies = pd.read_csv("data/raw/data_gama_gal_orient.txt", sep=r"\s+")
 
 #%%
 if __name__ == '__main__':

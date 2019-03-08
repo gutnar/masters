@@ -7,7 +7,7 @@ from inclination import sample_cos_t
 from time import time
 
 #%%
-galaxies = pd.read_csv("data_inclinations.txt")
+galaxies = pd.read_csv("data/intermediate/inclinations.txt")
 
 sample = galaxies
 print(sample.describe())

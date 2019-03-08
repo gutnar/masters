@@ -13,7 +13,7 @@ import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 #%% Load data
-galaxies = pd.read_csv("data_gama_gal_orient.txt", sep=r"\s+")
+galaxies = pd.read_csv("data/raw/data_gama_gal_orient.txt", sep=r"\s+")
 galaxies["baslot"] = galaxies["ba"].multiply(100).apply(np.ceil).astype(int) - 1
 
 #%% Generate training and test sets

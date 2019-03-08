@@ -37,4 +37,4 @@ if __name__ == '__main__':
         sample, pd.DataFrame.from_records(inclinations, columns=("x_mu", "x_sigma", "z_mu", "z_sigma"))
     ], axis=1, sort=False)
 
-    data.to_csv("data_inclinations.txt", index=False)
+    data.to_csv("data/intermediate/inclinations.txt", index=False)

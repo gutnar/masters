@@ -103,33 +103,3 @@ if __name__ == '__main__':
         ])
     
     print(time() - start)
-
-#%%
-plt.hist(cos_t_samples, 100, (0, 1), density=True)
-
-kde = sm.nonparametric.KDEUnivariate(cos_t_samples)
-kde.fit()
-plt.plot(kde.support, kde.density)
-
-#%%
-cos_t_samples = pd.read_csv("angles.txt")
-#plt.hist(cos_t_samples, 100, (0, 1), density=True)
-
-#kde = sm.nonparametric.KDEUnivariate(cos_t_samples)
-#kde.fit()
-#plt.plot(kde.support, kde.density)
-
-
-#%%
-values = cos_t_samples.where(
-    (cos_t_samples != 0.0) & (cos_t_samples != 1.0)
-).iloc[:, 0]
-
-plt.hist(values, 100, (0, 1), density=True)
-
-#kde = sm.nonparametric.KDEUnivariate(values)
-#kde.fit()
-#plt.plot(kde.support, kde.density)
-
-#%%
-plt.hist(np.random.uniform(0, 1, 1000), 100, (0, 1))

@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 #plt.rcParams['figure.figsize'] = [16, 5]
 
 #%% Get galaxies and assign discrete ba slots
-galaxies = pd.read_csv("data_gama_gal_orient.txt", sep=r"\s+")
+galaxies = pd.read_csv("data/raw/data_gama_gal_orient.txt", sep=r"\s+")
 galaxies["baslot"] = galaxies["ba"].multiply(100).apply(np.ceil) - 1
 
 #%%
