@@ -4,105 +4,93 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sympy import Symbol, symbols, sqrt, solve, Eq, cos, sin
 from scipy.optimize import fsolve, differential_evolution, brute
-from helpers import get_truncnorm_sample, plot_truncnorm_pdf
+from helpers import PDF
 from time import time
 from multiprocessing import Pool
 from os import cpu_count
 import statsmodels.api as sm
+import scipy.stats as stats
 
 #%%
-gama = pd.read_csv("data/raw/gama_data_for_gutnar.txt", sep=r"\s+")
-inclinations = pd.read_csv("data/intermediate/inclinations.txt")
-
-combined = gama.merge(inclinations, on="id", how="inner")
-combined.describe()
+galaxies = pd.read_csv("data/intermediate/inclinations.txt")
 
 #%%
-from classifier import clf, parameters
-from inclination import estimate_inclination
+# Create some dummy data
+rvs = np.append(stats.norm.rvs(loc=2,scale=1,size=(1000,1)),
+                stats.norm.rvs(loc=0,scale=3,size=(1000,1)),
+                axis=1)
 
-galaxies = pd.read_csv("data_inclinations.txt")
-
-#%%
-sorted_galaxies = galaxies.sort_values(by=["x_mu"], ascending=True)
-galaxy = sorted_galaxies.iloc[[50]]
-
-pdf = clf.predict_proba(galaxy[parameters].values)[0] / 0.01
-result = estimate_inclination(pdf, True)
-
-galaxy, result
+# Regular grid to evaluate kde upon
+x_flat = np.r_[rvs[:,0].min():rvs[:,0].max():128j]
+y_flat = np.r_[rvs[:,1].min():rvs[:,1].max():128j]
+x,y = np.meshgrid(x_flat,y_flat)
+grid_coords = np.append(x.reshape(-1,1),y.reshape(-1,1),axis=1)
 
 #%%
-from inclination import sample_cos_t
-from scipy.stats import truncnorm
+start = time()
 
-galaxy = galaxies.iloc[[9000]]
+kde = stats.kde.gaussian_kde(rvs.T)
+z = kde(grid_coords.T)
+z = z.reshape(128,128)
 
-cos_t = sample_cos_t(
-    float(galaxy["ba"]),
-    float(galaxy["x_mu"]),
-    float(galaxy["x_sigma"]),
-    float(galaxy["z_mu"]),
-    float(galaxy["z_sigma"]),
-    10000
+plt.imshow(z,aspect=x_flat.ptp()/y_flat.ptp())
+
+time() - start
+
+
+#%%
+ba_kde = sm.nonparametric.KDEUnivariate(galaxies["ba"].values)
+ba_kde.fit(bw=0.01)
+ba_grid = np.linspace(0, 1, 100)
+ba_pdf = PDF(ba_kde.evaluate(ba_grid), ba_grid)
+
+plt.hist(galaxies["ba"].values, 100, (0, 1), density=True)
+ba_pdf.plot()
+
+#%%
+samples = ba_pdf.sample(100000)
+plt.hist(samples, 100, (0, 1), density=True)
+ba_pdf.plot()
+
+#%%
+ba_samples = ba_pdf.sample(100)
+
+#%%
+def bayesian(ba_pdf):
+    pass
+
+
+#%%
+qx = np.column_stack((
+    ba_pdf.sample(50000),
+    np.random.uniform(0, 1, 50000)
+))
+
+x, y = np.meshgrid(
+    np.linspace(0, 1, 100),
+    np.linspace(0, 1, 100)
 )
 
-plt.hist(cos_t, 100, (0, 1))
+qx_grid = np.append(x.reshape(-1, 1), y.reshape(-1, 1), axis=1)
 
 #%%
-from inclination import get_ba
-from symbolic import test_cos_t
+start = time()
+qx_kde = stats.kde.gaussian_kde(qx.T)
+qx_pdf = qx_kde(qx_grid.T).reshape(100, 100)
+print(time() - start)
 
-if __name__ == '__main__':
-    N = 1000
-    x = np.random.normal(0.3, 0.1, N)
-    z = get_truncnorm_sample(0.9, 0.05, 0, 1, N)
-    ba = get_ba(x, z)
-    
-    #cos_t = np.sqrt((ba**2 - x**2) / (1 - x**2))
-    p = np.random.uniform(0, 2*np.pi, N)
-
-    cos_t = [
-        fsolve(test_cos_t, 0.5, (p[i], x[i], z[i], ba[i]))[0]
-        for i in range(N)
-    ]
-
-    plt.hist(cos_t, 100)
+plt.imshow(qx_pdf, aspect=1)
 
 #%%
-from inclination import sample_cos_t
+qx2 = qx[qx[:,0] < qx[:,1]]
 
-if __name__ == '__main__':
-    galaxies = pd.read_csv("data_inclinations.txt")
+#%%
+start = time()
+qx_kde = sm.nonparametric.KDEMultivariate(qx.T, "cc")
+qx_pdf = qx_kde.pdf(qx_grid.T).reshape(100, 100)
+print(time() - start)
 
-    sample = galaxies
-    print(sample.describe())
+plt.imshow(qx_pdf, aspect=1)
 
-    #plt.figure(1)
-    #plt.hist(galaxies["ba"], 100)
-
-    #processes = cpu_count() - 1
-    #chunks = np.array_split(sample, processes)
-
-    start = time()
-    #pool = Pool(processes)
-    #angles = pd.concat(pool.map(process_galaxies, chunks))
-
-    cos_t_samples = np.array([])
-
-    for i in range(len(sample)):
-        galaxy = sample.iloc[[i]]
-        
-        cos_t_samples = np.concatenate([
-            cos_t_samples,
-            sample_cos_t(
-                float(galaxy["ba"]),
-                float(galaxy["x_mu"]),
-                float(galaxy["x_sigma"]),
-                float(galaxy["z_mu"]),
-                float(galaxy["z_sigma"]),
-                10
-            )
-        ])
-    
-    print(time() - start)
+#%%
+plt.plot(qx_pdf.reshape(100, 100)[:,15])

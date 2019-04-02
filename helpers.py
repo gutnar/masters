@@ -79,3 +79,36 @@ def sample_ba_hist(hist, N=1):
     return np.array([
         np.random.uniform(slot * 0.01, (slot + 1) * 0.01) for slot in slots
     ])
+
+
+def sample_inclination(pdf, a=0, b=1, N=1):
+    pdf = pdf[int(a*100):int(b*100)]
+
+    if len(pdf) <= 1:
+        return np.random.uniform(a, b, N)
+
+    cdf = np.cumsum(pdf)
+    cdf = cdf / cdf[-1]
+    values = np.random.rand(N)
+    slots = np.searchsorted(cdf, values)
+
+    return a + np.array([
+        np.random.uniform(slot * 0.01, (slot + 1) * 0.01) for slot in slots
+    ])
+
+
+class PDF:
+    def __init__(self, pdf, grid):
+        self.pdf = pdf
+        self.cdf = np.cumsum(pdf)
+        self.cdf = self.cdf / self.cdf[-1]
+        self.grid = grid
+
+    def sample(self, size):
+        values = np.random.rand(size)
+        value_bins = np.searchsorted(self.cdf, values)
+        random_from_cdf = self.grid[value_bins]
+        return random_from_cdf
+    
+    def plot(self):
+        plt.plot(self.grid, self.pdf)

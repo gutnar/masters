@@ -72,7 +72,8 @@ def plot_quantile_inclination_results(galaxies, parameter, cuts):
     for i in range(len(cuts) - 1):
         plt.figure(1)
 
-        hist = np.histogram(galaxies[quantiles == i]["ba"].values, 100, (0, 1), density=True)[0]
+        ba = galaxies[quantiles == i]["ba"].values
+        hist = np.histogram(ba, 100, (0, 1), density=True)[0]
         color = next(plt.gca()._get_lines.prop_cycler)['color']
 
         start = time()
@@ -82,6 +83,21 @@ def plot_quantile_inclination_results(galaxies, parameter, cuts):
         plt.figure(2)
         plot_truncnorm_pdf(result[0], result[1], 0, 1, color=color, label="x ~ N(%.2f, %.2f)" % (result[0], result[1]))
         plot_truncnorm_pdf(result[2], result[3], 0, 1, color=color, linestyle="--", label="z ~ N(%.2f, %.2f)" % (result[2], result[3]))
+        
+        plt.figure(3)
+        cos_samples = np.array([])
+
+        for ba_sample in ba[:1000]:
+            cos_samples = np.concatenate(
+                (cos_samples, sample_cos_t(
+                    ba_sample,
+                    result[0], result[1],
+                    result[2], result[3],
+                    10
+                )), axis=0
+            )
+        
+        plt.hist(cos_samples, 100, (0, 1), histtype="step", color=color)
 
     plt.figure(1)
     plt.title(parameter)
