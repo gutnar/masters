@@ -98,17 +98,30 @@ def sample_inclination(pdf, a=0, b=1, N=1):
 
 
 class PDF:
-    def __init__(self, pdf, grid):
+    def __init__(self, pdf, grid, add_uniform=False):
         self.pdf = pdf
         self.cdf = np.cumsum(pdf)
         self.cdf = self.cdf / self.cdf[-1]
         self.grid = grid
 
+        if add_uniform:
+            self.add_uniform = self.grid[1] - self.grid[0]
+        else:
+            self.add_uniform = 0
+
     def sample(self, size):
         values = np.random.rand(size)
         value_bins = np.searchsorted(self.cdf, values)
         random_from_cdf = self.grid[value_bins]
+
+        if self.add_uniform:
+            return random_from_cdf + np.random.uniform(0, self.add_uniform, size)
+
         return random_from_cdf
     
     def plot(self):
         plt.plot(self.grid, self.pdf)
+    
+    def interp(self, x):
+        return np.interp(x, self.grid, self.pdf)
+

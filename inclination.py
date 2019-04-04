@@ -138,7 +138,7 @@ if __name__ == '__main__':
 
 #%%
 if __name__ == '__main__':
-    plot_quantile_inclination_results(galaxies, "rabsmag", (0, 1/2, 1))
+    plot_quantile_inclination_results(galaxies, "rabsmag", (0, 1/10, 1))
 
 #%%
 if __name__ == '__main__':
