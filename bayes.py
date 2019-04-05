@@ -12,7 +12,12 @@ from time import time
 from helpers import PDF
 from analytical import get_q, get_p_domain, get_cos_t, get_dum
 
-warnings.filterwarnings("ignore")
+if __name__ == "__main__":
+    warnings.filterwarnings("ignore")
+    plt.rcParams.update({
+        "figure.figsize": [16, 10],
+        "font.size": 16
+    })
 
 def plot_kde(kde, xlabel, ylabel, resample=True):
     if resample:
@@ -47,12 +52,12 @@ kde_grid = np.append(kde_mesh[0].reshape(-1, 1), kde_mesh[1].reshape(-1, 1), axi
 def sample_qxzpt(xz_kde, N):
     x, z = xz_kde.resample(N)
     #valid = (x > 0) & (x < z) & (z < 1)
-    valid = (x > 0) & (x < z) & (z > 0.6) & (z < 1)
+    valid = (x > 0) & (x < z) & (z > 0.5) & (z < 1)
     x = x[valid]
     z = z[valid]
     N = len(x)
     
-    p = np.random.uniform(0, 2*np.pi, N)
+    p = np.random.uniform(0, np.pi, N)
     t = np.arccos(np.random.uniform(0, 1, N))
     q = get_q(x, z, p, t)
 
@@ -71,16 +76,16 @@ def get_xz_posterior_kde(q_target_pdf, xz_kde, N, bw_method):
     weights = q_target_pdf.interp(q) / q_sample_pdf.interp(q)
 
     # Create posterior xz distribution
-    posterior = choices(np.indices(weights.shape)[0], weights, k=N)
-    x = x[posterior]
-    z = z[posterior]
+    #posterior = choices(np.indices(weights.shape)[0], weights, k=N)
+    #x = x[posterior]
+    #z = z[posterior]
 
-    cos_t_posterior = np.cos(t[posterior])
-    cos_t_posterior_kde = sm.nonparametric.KDEUnivariate(cos_t_posterior)
-    cos_t_posterior_kde.fit(bw=0.03)
-    cos_t_posterior_pdf = PDF(cos_t_posterior_kde.evaluate(q_grid), q_grid)
+    #cos_t_posterior = np.cos(t[posterior])
+    #cos_t_posterior_kde = sm.nonparametric.KDEUnivariate(cos_t_posterior)
+    #cos_t_posterior_kde.fit(bw=0.03)
+    #cos_t_posterior_pdf = PDF(cos_t_posterior_kde.evaluate(q_grid), q_grid)
 
-    weights = np.mean(cos_t_posterior_pdf.pdf) / cos_t_posterior_pdf.interp(cos_t_posterior)
+    #weights = np.mean(cos_t_posterior_pdf.pdf) / cos_t_posterior_pdf.interp(cos_t_posterior)
 
     # Create posterior xz distribution
     posterior = choices(np.indices(weights.shape)[0], weights, k=N)
@@ -92,12 +97,8 @@ def get_xz_posterior_kde(q_target_pdf, xz_kde, N, bw_method):
     return stats.kde.gaussian_kde(xz_posterior.T, bw_method)
 
 
-def get_xz_kde(q_pdf, plot=False, methods=[(1000, "scott"), (1000, "scott"), (1000, "scott"), (10000, "scott")]):
-    #xz_kde = xz_initial_kde
-    
+def get_xz_kde(q_pdf, plot=False, methods=[(1000, "scott")]*100 + [(150000, 0.05)]*50):
     q_samples = q_pdf.sample(10000)
-    #x = np.random.uniform(0, q_samples)
-    #z = np.random.uniform(q_samples, x / q_samples)
     z = np.random.normal(0.85, 0.1, 10000)
     x = np.random.uniform(0, q_samples)
     xz_kde = stats.kde.gaussian_kde(np.column_stack((x, z)).T)
@@ -109,42 +110,28 @@ def get_xz_kde(q_pdf, plot=False, methods=[(1000, "scott"), (1000, "scott"), (10
         q, x, z, p, t = sample_qxzpt(xz_kde, 10000)
         q_sample_kde = sm.nonparametric.KDEUnivariate(q)
         q_sample_kde.fit(bw=0.03)
-
+        
         plt.figure(1)
+        plot_xz_kde(xz_kde)
+
+        plt.figure(2)
         plt.xlim((0, 1))
         plt.plot(q_pdf.grid, q_pdf.pdf, label="target q")
         plt.plot(q_sample_kde.support, q_sample_kde.density, label="q")
-        plt.hist(np.cos(t), 100, (0, 1), True, label="cos(t)")
+        plt.hist(np.cos(t), 100, (0, 1), True, label=r"$\cos(\theta)$", histtype="step")
+        plt.hist(p/np.pi, 100, (0, 1), True, label=r"$\phi/\pi$", histtype="step")
         plt.gca().legend()
-        
-        plt.figure(2)
-        plot_xz_kde(xz_kde)
 
-        plt.figure(3)
-        qt_kde = stats.kde.gaussian_kde(np.column_stack((q, np.cos(t))).T)
-        plot_qt_kde(qt_kde, False)
+        #plt.figure(3)
+        #qt_kde = stats.kde.gaussian_kde(np.column_stack((q, np.cos(t))).T)
+        #plot_qt_kde(qt_kde, False)
 
     return xz_kde
 
 
 def sample_cos_t(q, xz_kde, N):
-    #box = (xz_kde.dataset[0,:] <= q) & (xz_kde.dataset[1,:] >= q)
-    #subset = xz_kde.dataset.T[box].T
-
-    #if len(subset[0]) <= 1:
-    #    print("empty")
-    #    return np.array([])
-    #else:
-    #    try:
-    #        xz_sub_kde = stats.kde.gaussian_kde(subset)
-    #        x, z = xz_sub_kde.resample(N)
-    #    except np.linalg.LinAlgError:
-    #        print("error")
-    #        return np.array([])
-    
     x, z = xz_kde.resample(N)
     valid = (x > 0) & (x < q) & (z > q) & (z < 1)
-    #valid = (x > 0) & (x < z) & (z < 1)
     x = x[valid]
     z = z[valid]
     N = len(x)
@@ -183,31 +170,56 @@ if __name__ == "__main__":
     q_pdf.plot()
 
 #%%
-plt.hist(q_pdf.sample(100000), 1000, (0, 1))
-
-#%%
 if __name__ == "__main__":
     start = time()
     xz_kde = get_xz_kde(q_pdf, True, [(1000, "scott")]*100 + [(150000, 0.05)]*50)
     print(time() - start)
 
 #%%
-q, x, z, p, t = sample_qxzpt(xz_kde, 150000)
-qt_kde = stats.kde.gaussian_kde(np.column_stack((q, np.cos(t))).T, 0.05)
-q, cos_t = qt_kde.resample(10000)
+if __name__ == "__main__":
+    q, x, z, p, t = sample_qxzpt(xz_kde, 150000)
 
-plt.figure(1)
-plot_qt_kde(qt_kde, True)
+    qt_kde = stats.kde.gaussian_kde(np.column_stack((q, np.cos(t))).T, 0.05)
+    qp_kde = stats.kde.gaussian_kde(np.column_stack((q, p/np.pi)).T, 0.05)
+    
+    plt.figure(1)
+    plot_kde(qt_kde, r"$q$", r"$cos(\theta)$")
+    
+    plt.figure(2)
+    plot_kde(qp_kde, r"$q$", r"$\phi/\pi$")
 
-plt.figure(2)
-plt.hist(q, 100, (0, 1), True, histtype="step")
-plt.hist(cos_t, 100, (0, 1), True, histtype="step")
+    #plt.figure(3)
+    #q_pdf.plot()
+    #plt.hist(q, 100, (0, 1), True, histtype="step", label=r"$q$")
+    #plt.hist(cos_t, 100, (0, 1), True, histtype="step", label=r"$\cos(\theta)$")
+    #plt.hist(p/np.pi, 100, (0, 1), True, histtype="step", label=r"$\phi/\pi$")
+    #plt.gca().legend()
+
 
 #%%
-start = time()
-test_pdf = PDF(qt_kde(np.column_stack((np.repeat(0.01, 25), np.linspace(0, 1, 25))).T), np.linspace(0, 1, 25), True)
-test_pdf.plot()
-print(time() - start)
+if __name__ == "__main__":
+    test_q = [0.01, 0.5, 0.99]
+
+    for i, q in enumerate(test_q):
+        start = time()
+        
+        test_cos_t_pdf = PDF(qt_kde(np.column_stack(
+            (np.repeat(q, 100),
+            np.linspace(0, 1, 100)
+        )).T), np.linspace(0, 1, 100), True)
+        
+        test_p_pdf = PDF(qp_kde(np.column_stack(
+            (np.repeat(q, 100),
+            np.linspace(0, 1, 100)
+        )).T), np.linspace(0, 1, 100), True)
+
+        print(time() - start)
+        
+        plt.figure(i + 1)
+        plt.title(r"$q = %.2f$" % q)
+        test_cos_t_pdf.plot(label=r"$\cos(\theta)$")
+        test_p_pdf.plot(label=r"$\phi/\pi$")
+        plt.gca().legend()
 
 #%%
 if __name__ == "__main__":
@@ -301,7 +313,7 @@ from classifier import predict_pdf
 
 galaxy = galaxies.iloc[[666]]
 galaxy_pdf = predict_pdf(galaxy)
-galaxy_kde = get_xz_kde(galaxy_pdf, True, [(1000, "scott")]*100 + [(100000, 0.025)]*50)
+galaxy_kde = get_xz_kde(galaxy_pdf, True, [(1000, "scott")]*100 + [(150000, 0.05)]*50)
 
 #%%
 test_pdf = PDF(np.histogram(np.concatenate((

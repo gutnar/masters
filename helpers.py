@@ -119,8 +119,8 @@ class PDF:
 
         return random_from_cdf
     
-    def plot(self):
-        plt.plot(self.grid, self.pdf)
+    def plot(self, **kwargs):
+        plt.plot(self.grid, self.pdf, **kwargs)
     
     def interp(self, x):
         return np.interp(x, self.grid, self.pdf)
