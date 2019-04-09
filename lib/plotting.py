@@ -51,7 +51,7 @@ def plot_kde(kde, grid, resample=True, **kwargs):
     plt.imshow(pdf, "magma", origin="lower", **kwargs)
 
 
-def plot_xz_kde(ba):
+def plot_xz_kde(ba, resample=True, **kwargs):
     plt.xlabel(r"$\xi$")
     plt.xticks(
         [0, 19, 39, 59, 79, 99],
@@ -64,10 +64,10 @@ def plot_xz_kde(ba):
         [("%.1f" % z) for z in np.linspace(ba.Z_MIN, 1, 6)]
     )
 
-    plot_kde(ba.xz_kde, XZ_GRID, aspect=1/2)
+    plot_kde(ba.xz_kde, XZ_GRID, resample, aspect=1/2, **kwargs)
 
 
-def plot_qt_kde(ba):
+def plot_qt_kde(ba, resample=True, **kwargs):
     plt.xlabel(r"$q$")
     plt.xticks(
         [0, 19, 39, 59, 79, 99],
@@ -80,10 +80,10 @@ def plot_qt_kde(ba):
         [(r"$%d^∘$" % t) for t in np.linspace(0, 90, 6)]
     )
 
-    plot_kde(ba.qt_kde, QT_GRID, aspect=1)
+    plot_kde(ba.qt_kde, QT_GRID, resample, aspect=1, **kwargs)
 
 
-def plot_qp_kde(ba):
+def plot_qp_kde(ba, resample=True, **kwargs):
     plt.xlabel(r"$q$")
     plt.xticks(
         [0, 19, 39, 59, 79, 99],
@@ -96,4 +96,4 @@ def plot_qp_kde(ba):
         [(r"$%d^∘$" % t) for t in np.linspace(0, 180, 6)]
     )
 
-    plot_kde(ba.qp_kde, QP_GRID, aspect=1)
+    plot_kde(ba.qp_kde, QP_GRID, resample, aspect=1, **kwargs)

@@ -21,7 +21,7 @@ class PDF:
     def sample(self, N):
         choices = np.random.rand(N)
         indices = np.searchsorted(self.cdf, choices)
-        values = self.y[indices]
+        values = self.x[indices]
         
         return values
     

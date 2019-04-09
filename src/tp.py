@@ -24,35 +24,36 @@ if __name__ != "__main__":
     elif sys.argv[4] == "sample":
         approximator = SampleApproximator(pd.read_csv("data/intermediate/%s.csv" % sys.argv[3]))
     elif sys.argv[4] == "classifier":
-        approximator = ClassifierApproximator()
+        approximator = ClassifierApproximator(pd.read_csv("data/intermediate/train_galaxies.csv"))
 
 #%%
 def process_galaxies(galaxies):
-    t_samples = []
-    p_samples = []
-
+    samples = np.empty((0, 2))
+    
     for i, galaxy in galaxies.iterrows():
-        t_pdf = approximator.get_t_pdf(galaxy)
-        p_pdf = approximator.get_p_pdf(galaxy)
+        samples = np.vstack((
+            samples, approximator.sample_tp(galaxy, samples_per_galaxy)
+        ))
 
-        t_samples.append(t_pdf.sample(samples_per_galaxy))
-        p_samples.append(p_pdf.sample(samples_per_galaxy))
-
-    return t_samples, p_samples
+    return samples
 
 #%%
 if __name__ == "__main__":
     galaxies = pd.read_csv("data/intermediate/%s.csv" % sys.argv[3])
+    #galaxies = galaxies[:10]
 
     pool = Pool(processes)
     chunks = np.array_split(galaxies, processes)
 
     start = time()
-    results = np.array(pool.map(process_galaxies, chunks))
+    results = np.vstack(pool.map(process_galaxies, chunks))
     print(time() - start)
 
-    t = results[:,0,:,:].flatten()
-    p = results[:,1,:,:].flatten()
+    #print(results)
+    print(results.shape)
+
+    t = results[:,0]
+    p = results[:,1]
 
     plt.figure(1)
     plt.hist(np.cos(t), 100, (0, 1), True)

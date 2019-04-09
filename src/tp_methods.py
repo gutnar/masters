@@ -1,5 +1,5 @@
 import numpy as np
-from lib import BayesianApproximation, PDF
+from lib import BayesianApproximation, PDF, Classifier
 
 
 class SampleApproximator:
@@ -10,15 +10,33 @@ class SampleApproximator:
         )
 
         self.ba = BayesianApproximation(q_pdf)
-        self.ba.run()#([(1000, "scott")])
+        self.ba.run()
     
-    def get_t_pdf(self, galaxy):
-        return self.ba.get_t_pdf(galaxy["ba"])
-    
-    def get_p_pdf(self, galaxy):
-        return self.ba.get_p_pdf(galaxy["ba"])
+    def sample_tp(self, galaxy, N):
+        t_pdf = self.ba.get_t_pdf(galaxy["ba"])
+        p_pdf = self.ba.get_p_pdf(galaxy["ba"])
+
+        return np.column_stack((
+            t_pdf.sample(N),
+            p_pdf.sample(N)
+        ))
 
 
 class ClassifierApproximator:
-    def __init__(self):
-        pass
+    def __init__(self, galaxies):
+        self.classifier = Classifier(100)
+        self.classifier.fit(galaxies)
+
+    def sample_tp(self, galaxy, N):
+        q_pdf = self.classifier.predict_pdf(galaxy)
+
+        ba = BayesianApproximation(q_pdf)
+        ba.run()
+
+        t_pdf = ba.get_t_pdf(galaxy["ba"])
+        p_pdf = ba.get_p_pdf(galaxy["ba"])
+        
+        return np.column_stack((
+            t_pdf.sample(N),
+            p_pdf.sample(N)
+        ))
