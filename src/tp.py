@@ -1,7 +1,6 @@
 #%%
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 from time import time
 from multiprocessing import Pool
 from itertools import product
@@ -18,13 +17,12 @@ processes = int(sys.argv[1])
 samples_per_galaxy = int(sys.argv[2])
 
 #%%
-if __name__ != "__main__":
-    if sys.argv[4] == "global":
-        approximator = SampleApproximator(pd.read_csv("data/raw/data_gama_gal_orient.txt", r"\s+"))
-    elif sys.argv[4] == "sample":
-        approximator = SampleApproximator(pd.read_csv("data/intermediate/%s.csv" % sys.argv[3]))
-    elif sys.argv[4] == "classifier":
-        approximator = ClassifierApproximator(pd.read_csv("data/intermediate/train_galaxies.csv"))
+if sys.argv[4] == "global":
+    approximator = SampleApproximator(pd.read_csv("data/raw/data_gama_gal_orient.txt", r"\s+"))
+elif sys.argv[4] == "sample":
+    approximator = SampleApproximator(pd.read_csv("data/intermediate/%s.csv" % sys.argv[3]))
+elif sys.argv[4] == "classifier":
+    approximator = ClassifierApproximator(pd.read_csv("data/intermediate/train_galaxies.csv"))
 
 #%%
 def process_galaxies(galaxies):
@@ -54,14 +52,6 @@ if __name__ == "__main__":
 
     t = results[:,0]
     p = results[:,1]
-
-    plt.figure(1)
-    plt.hist(np.cos(t), 100, (0, 1), True)
-    plt.savefig("plots/%s_%s_cos_t.png" % (sys.argv[3], sys.argv[4]))
-
-    plt.figure(2)
-    plt.hist(p, 100, (0, np.pi), True)
-    plt.savefig("plots/%s_%s_p.png" % (sys.argv[3], sys.argv[4]))
 
     galaxies = galaxies.loc[galaxies.index.repeat(samples_per_galaxy)]
     galaxies["t"] = t
