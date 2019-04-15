@@ -17,13 +17,13 @@ classifier.fit(train_galaxies)
 
 #%%
 for i in range(10):
-    q_pdf = classifier.predict_pdf(test_galaxies.iloc[[i*5]])
+    q_pdf = classifier.predict_pdf(test_galaxies.iloc[[i*13]])
     plt.plot(q_pdf.x, q_pdf.y)
 
 #%%
 start = time()
 ba = BayesianApproximation(q_pdf)
-ba.run([(150000, 0.05)]*25)
+ba.run([(150000, 0.05)]*50)
 print(time() - start)
 
 plot_ba_results(ba)
