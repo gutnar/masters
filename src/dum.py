@@ -7,58 +7,68 @@ import statsmodels.api as sm
 from analytical import get_dum
 
 #%%
-galaxies = pd.read_csv("data/intermediate/filament_galaxies_sample.csv")
+dum = {
+    "simple": np.array([]),
+    "random": np.array([]),
+    "global": np.array([]),
+    "classifier": np.array([])
+}
 
-dum = np.array([])
-dum_simple = np.array([])
-dum_random = np.array([])
-index = 0
+#%% Filament galaxies
+galaxies = pd.read_csv("data/intermediate/filament_galaxies.csv")
 
 for i, galaxy in galaxies.iterrows():
-    index += 1
-
-    dum = np.concatenate((
-        dum, get_dum(
-            galaxy["ra"], galaxy["dec"], galaxy["p"] * 180/np.pi, (np.cos(galaxy["t"]), ),
-            galaxy["gama"], galaxy["ex"], galaxy["ey"], galaxy["ez"]
-        )
-    ), axis=None)
-
     # Simple flatness estimation
-    dum_simple = np.concatenate((
-        dum_simple, get_dum(
+    dum["simple"] = np.concatenate((
+        dum["simple"], get_dum(
             galaxy["ra"], galaxy["dec"], galaxy["pos"], (galaxy["ba"], ),
             galaxy["gama"], galaxy["ex"], galaxy["ey"], galaxy["ez"]
         )
     ))
 
     # Random inclination angle
-    dum_random = np.concatenate((
-        dum_random, get_dum(
+    dum["random"] = np.concatenate((
+        dum["random"], get_dum(
             galaxy["ra"], galaxy["dec"], np.random.uniform(-90, 90, 10), np.random.uniform(0, 1, 10),
             galaxy["gama"], galaxy["ex"], galaxy["ey"], galaxy["ez"]
         )
     ))
 
+#%% Other methods
+for method in ("global", "classifier"):
+    galaxies = pd.read_csv("data/intermediate/filament_galaxies_%s.csv" % method)
+
+    for i, galaxy in galaxies.iterrows():
+        dum[method] = np.concatenate((
+            dum[method], get_dum(
+                galaxy["ra"], galaxy["dec"], galaxy["p"] * 180/np.pi, (np.cos(galaxy["t"]), ),
+                galaxy["gama"], galaxy["ex"], galaxy["ey"], galaxy["ez"]
+            )
+        ), axis=None)
+
+#%%
+for method in ("global", "classifier"):
+    galaxies = pd.read_csv("data/intermediate/filament_galaxies_%s.csv" % method)
+
+    plt.hist(np.cos(galaxies["t"]), 100, (0, 1), True, histtype="step", label=method)
+
+plt.legend()
+
 #%%
 plt.xlim((0, 1))
-plt.ylim((0.8, 1.2))
-#plt.hist(dum_random, 100, (0, 1), True, histtype="step")
-#plt.hist(dum_simple, 100, (0, 1), True, histtype="step")
-plt.hist(dum, 50, (0, 1), True, histtype="step")
+plt.ylim((0.85, 1.15))
 
-#%%
-kde = sm.nonparametric.KDEUnivariate(dum)
-kde_simple = sm.nonparametric.KDEUnivariate(dum_simple)
-kde_random = sm.nonparametric.KDEUnivariate(dum_random)
+for method in ("classifier",):
+    kde = sm.nonparametric.KDEUnivariate(
+        np.concatenate(
+            (-1*dum[method], dum[method], 2 - dum[method])
+        )
+    )
 
-kde.fit(bw=0.01, cut=0)
-kde_simple.fit(bw=0.01, cut=0)
-kde_random.fit(bw=0.01, cut=0)
+    kde.fit(bw=0.03)
+    plt.hist(dum[method], 100, (0, 1), True, histtype="step", label=method)
+    #plt.plot(kde.support, kde.density*3, label=method)
 
-plt.plot(kde_random.support, kde_random.density, label="random")
-plt.plot(kde_simple.support, kde_simple.density, label="b/a")
-plt.plot(kde.support, kde.density, label="bayes")
 plt.legend()
 
 #plt.savefig("plots/dum.png")
