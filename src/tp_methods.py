@@ -1,4 +1,5 @@
 import numpy as np
+import math
 from lib import BayesianApproximation, PDF, Classifier
 
 
@@ -45,6 +46,9 @@ class ClassifierApproximator:
 class RandomApproximator:
     def sample_tp(self, galaxy, N):
         return (
-            np.arccos(np.random.uniform(0, 1, N)),
+            np.concatenate((
+                -np.arccos(np.random.uniform(-1, 1, math.floor(N/2))),
+                np.arccos(np.random.uniform(-1, 1, math.ceil(N/2)))
+            )),
             np.random.uniform(-np.pi/2, np.pi/2, N)
         )

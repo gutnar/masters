@@ -4,7 +4,7 @@ from sklearn.preprocessing import normalize
 
 #%%
 def calc_gal_spin_vec(ra, dec, pos, inc):
-    pos = (pos + np.pi) % np.pi
+    #pos = (pos + np.pi) % np.pi
 
     # Find the components of unit spin vectors in the local
     # topocentric coordinate frame.

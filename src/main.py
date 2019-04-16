@@ -9,12 +9,13 @@ import sys
 
 sys.path.append(os.getcwd())
 
-from lib import BayesianApproximation, PDF
+from lib import BayesianApproximation, PDF, get_dum
 from tp_methods import *
 
 #%%
 processes = int(sys.argv[1])
 samples_per_galaxy = int(sys.argv[2])
+hist_bins = np.linspace(0, 1, 100)
 
 #%%
 if sys.argv[4] == "global":
@@ -28,47 +29,43 @@ elif sys.argv[4] == "random":
 
 #%%
 def process_galaxies(galaxies):
-    hist = np.zeros(100)
-    samples = np.empty((0, 2))
+    dum_hist = np.zeros(len(hist_bins) - 1)
     
     for i, galaxy in galaxies.iterrows():
         t, p = approximator.sample_tp(galaxy, samples_per_galaxy)
-        
-        galaxy = gals.loc[np.repeat(1, N)]
 
         dum = np.concatenate(get_dum(
-            galaxy["ra"], galaxy["dec"],
-            p_pdf.sample(N), t_pdf.sample(N),
-            galaxy["gama"],
-            galaxy["ex"], galaxy["ey"], galaxy["ez"]
+            np.repeat(galaxy["ra"], samples_per_galaxy),
+            np.repeat(galaxy["dec"], samples_per_galaxy),
+            p, t,
+            np.repeat(galaxy["gama"], samples_per_galaxy),
+            np.repeat(galaxy["ex"], samples_per_galaxy),
+            np.repeat(galaxy["ey"], samples_per_galaxy),
+            np.repeat(galaxy["ez"], samples_per_galaxy)
         ))
 
-        dum_hist = np.zeros(100)
-        dum_hist += np.histogram(dum, 100, (0, 1))[0]
+        dum_hist += np.histogram(dum, hist_bins)[0]
 
-        plt.plot(dum_hist)
-
-    return samples
+    return dum_hist
 
 #%%
 if __name__ == "__main__":
     galaxies = pd.read_csv("data/intermediate/%s.csv" % sys.argv[3])
-    #galaxies = galaxies[:10]
+    #galaxies = galaxies[:4]
 
     pool = Pool(processes)
     chunks = np.array_split(galaxies, processes)
 
     start = time()
-    results = np.vstack(pool.map(process_galaxies, chunks))
+    dum_hist = np.sum(
+        pool.map(process_galaxies, chunks), axis=0
+    ) / len(galaxies) / samples_per_galaxy / 2
     print(time() - start)
 
-    #print(results)
-    print(results.shape)
+    results = pd.DataFrame({
+        "min": hist_bins[:-1],
+        "max": hist_bins[1:],
+        "N": dum_hist
+    })
 
-    t = results[:,0]
-    p = results[:,1]
-
-    galaxies = galaxies.loc[galaxies.index.repeat(samples_per_galaxy)]
-    galaxies["t"] = t
-    galaxies["p"] = p
-    galaxies.to_csv("data/intermediate/%s_%s.csv" % (sys.argv[3], sys.argv[4]), index=False)
+    results.to_csv("data/final/%s_%s.csv" % (sys.argv[3], sys.argv[4]), index=False)
