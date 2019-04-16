@@ -102,7 +102,6 @@ def get_crd(ra, dec, dist):
         dist * np.sin(dec*rpi)
     ])
 
-#%%
 def get_rotated_gama_coordinates_crd(crd0, gama):
     if gama == 9:
         ra0 = 135.0

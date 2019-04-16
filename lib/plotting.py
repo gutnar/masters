@@ -11,14 +11,14 @@ XZ_GRID = np.append(
 )
 
 QT_MESH = np.meshgrid(
-    np.linspace(0, 1, 100), np.linspace(0, np.pi/2, 100)
+    np.linspace(0, 1, 100), np.linspace(-np.pi/2, np.pi/2, 100)
 )
 QT_GRID = np.append(
     QT_MESH[0].reshape(-1, 1), QT_MESH[1].reshape(-1, 1), 1
 )
 
 QP_MESH = np.meshgrid(
-    np.linspace(0, 1, 100), np.linspace(0, np.pi, 100)
+    np.linspace(0, 1, 100), np.linspace(-np.pi/2, np.pi/2, 100)
 )
 QP_GRID = np.append(
     QP_MESH[0].reshape(-1, 1), QP_MESH[1].reshape(-1, 1), 1
@@ -77,7 +77,7 @@ def plot_qt_kde(ba, resample=True, **kwargs):
     plt.ylabel(r"$\theta$", rotation=0)
     plt.yticks(
         [0, 19, 39, 59, 79, 99],
-        [(r"$%d^∘$" % t) for t in np.linspace(0, 90, 6)]
+        [(r"$%d^∘$" % t) for t in np.linspace(-90, 90, 6)]
     )
 
     plot_kde(ba.qt_kde, QT_GRID, resample, aspect=1, **kwargs)
@@ -93,7 +93,7 @@ def plot_qp_kde(ba, resample=True, **kwargs):
     plt.ylabel(r"$\phi$", rotation=0)
     plt.yticks(
         [0, 19, 39, 59, 79, 99],
-        [(r"$%d^∘$" % t) for t in np.linspace(0, 180, 6)]
+        [(r"$%d^∘$" % t) for t in np.linspace(-90, 90, 6)]
     )
 
     plot_kde(ba.qp_kde, QP_GRID, resample, aspect=1, **kwargs)

@@ -3,6 +3,7 @@ import numpy as np
 import statsmodels.api as sm
 import scipy.stats as stats
 import random
+import math
 
 from analytical import get_q
 from lib.pdf import PDF
@@ -30,8 +31,11 @@ class BayesianApproximation:
         z = z[valid]
         N = len(x)
         
-        p = np.random.uniform(0, np.pi, N)
-        t = np.arccos(np.random.uniform(0, 1, N))
+        p = np.random.uniform(-np.pi, np.pi, N)
+        t = np.concatenate((
+            -np.arccos(np.random.uniform(-1, 1, math.floor(N/2))),
+            np.arccos(np.random.uniform(-1, 1, math.ceil(N/2)))
+        ))
         q = get_q(x, z, p, t)
 
         return q, x, z, p, t
@@ -74,20 +78,18 @@ class BayesianApproximation:
     
     @classmethod
     def get_t_pdf(self, q, values=100):
-        return PDF(
-            np.linspace(0, np.pi/2, values),
-            self.qt_kde(np.column_stack(
-                (np.repeat(q, values),
-                np.linspace(0, np.pi/2, values)
-            )).T)
-        )
+        x = np.linspace(-np.pi/2, np.pi/2, values)
+        y = self.qt_kde(np.column_stack(
+            (np.repeat(q, values), x
+        )).T)
+
+        return PDF(x, y + np.flip(y))
     
     @classmethod
     def get_p_pdf(self, q, values=100):
-        return PDF(
-            np.linspace(0, np.pi, values),
-            self.qp_kde(np.column_stack(
-                (np.repeat(q, values),
-                np.linspace(0, np.pi, values)
-            )).T)
-        )
+        x = np.linspace(-np.pi/2, np.pi/2, values)
+        y = self.qp_kde(np.column_stack(
+            (np.repeat(q, values), x
+        )).T)
+
+        return PDF(x, y + np.flip(y))

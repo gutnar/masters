@@ -4,7 +4,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import statsmodels.api as sm
 
-from analytical import get_dum
+from lib import get_dum
 
 #%%
 dum = {
@@ -14,61 +14,95 @@ dum = {
     "classifier": np.array([])
 }
 
+cos = {
+    "simple": np.array([]),
+    "random": np.array([]),
+    "global": np.array([]),
+    "classifier": np.array([])
+}
+
+phi = {
+    "simple": np.array([]),
+    "random": np.array([]),
+    "global": np.array([]),
+    "classifier": np.array([])
+}
+
 #%% Filament galaxies
 galaxies = pd.read_csv("data/intermediate/filament_galaxies.csv")
+galaxies = galaxies.loc[galaxies.index.repeat(10)]
 
-for i, galaxy in galaxies.iterrows():
-    # Simple flatness estimation
-    dum["simple"] = np.concatenate((
-        dum["simple"], get_dum(
-            galaxy["ra"], galaxy["dec"], galaxy["pos"], (galaxy["ba"], ),
-            galaxy["gama"], galaxy["ex"], galaxy["ey"], galaxy["ez"]
-        )
-    ))
+# Simple flatness estimation
+cos["simple"] = galaxies["ba"]
+phi["simple"] = galaxies["pos"]/180*np.pi
+dum["simple"] = np.concatenate(get_dum(
+    galaxies["ra"], galaxies["dec"],
+    galaxies["pos"]/180*np.pi, np.arccos(galaxies["ba"]),
+    galaxies["gama"],
+    galaxies["ex"], galaxies["ey"], galaxies["ez"]
+))
 
-    # Random inclination angle
-    dum["random"] = np.concatenate((
-        dum["random"], get_dum(
-            galaxy["ra"], galaxy["dec"], np.random.uniform(-90, 90, 10), np.random.uniform(0, 1, 10),
-            galaxy["gama"], galaxy["ex"], galaxy["ey"], galaxy["ez"]
-        )
-    ))
+# Random inclination angle
+cos["random"] = np.random.uniform(0, 1, len(galaxies))
+phi["random"] = np.random.uniform(0, np.pi, len(galaxies))
+dum["random"] = np.concatenate(get_dum(
+    galaxies["ra"], galaxies["dec"],
+    phi["random"], np.arccos(cos["random"]),
+    galaxies["gama"],
+    galaxies["ex"], galaxies["ey"], galaxies["ez"]
+))
 
 #%% Other methods
 for method in ("global", "classifier"):
     galaxies = pd.read_csv("data/intermediate/filament_galaxies_%s.csv" % method)
 
-    for i, galaxy in galaxies.iterrows():
-        dum[method] = np.concatenate((
-            dum[method], get_dum(
-                galaxy["ra"], galaxy["dec"], galaxy["p"] * 180/np.pi, (np.cos(galaxy["t"]), ),
-                galaxy["gama"], galaxy["ex"], galaxy["ey"], galaxy["ez"]
-            )
-        ), axis=None)
+    cos[method] = np.cos(galaxies["t"])
+    phi[method] = galaxies["p"]
+    dum[method] = np.concatenate(get_dum(
+        galaxies["ra"], galaxies["dec"],
+        galaxies["p"], galaxies["t"],
+        galaxies["gama"],
+        galaxies["ex"], galaxies["ey"], galaxies["ez"]
+    ))
 
 #%%
-for method in ("global", "classifier"):
-    galaxies = pd.read_csv("data/intermediate/filament_galaxies_%s.csv" % method)
+for method in ("random", "global", "classifier"):
+    kde_cos = sm.nonparametric.KDEUnivariate(
+        np.concatenate((-1*cos[method], cos[method], 2 - cos[method]))
+    )
+    kde_cos.fit(bw=0.03)
+    
+    kde_phi = sm.nonparametric.KDEUnivariate(
+        np.concatenate((-1*phi[method], phi[method], 2*np.pi - phi[method]))
+    )
+    kde_phi.fit(bw=0.03)
+    
+    kde_dum = sm.nonparametric.KDEUnivariate(
+        np.concatenate((-1*dum[method], dum[method], 2 - dum[method]))
+    )
+    kde_dum.fit(bw=0.03)
 
-    plt.hist(np.cos(galaxies["t"]), 100, (0, 1), True, histtype="step", label=method)
+    plt.figure(1)
+    plt.plot(kde_cos.support, kde_cos.density*3, label=method)
+    #plt.hist(dum[method], 100, (0, 1), True, histtype="step", label=method)
+    
+    plt.figure(2)
+    plt.plot(kde_phi.support, kde_phi.density*3, label=method)
+    
+    plt.figure(3)
+    plt.plot(kde_dum.support, kde_dum.density*3, label=method)
 
-plt.legend()
+plt.figure(1)
+plt.xlim((0, 1))
+plt.gca().legend()
 
-#%%
+plt.figure(2)
+plt.xlim((0, np.pi))
+plt.gca().legend()
+
+plt.figure(3)
 plt.xlim((0, 1))
 plt.ylim((0.85, 1.15))
-
-for method in ("classifier",):
-    kde = sm.nonparametric.KDEUnivariate(
-        np.concatenate(
-            (-1*dum[method], dum[method], 2 - dum[method])
-        )
-    )
-
-    kde.fit(bw=0.03)
-    plt.hist(dum[method], 100, (0, 1), True, histtype="step", label=method)
-    #plt.plot(kde.support, kde.density*3, label=method)
-
-plt.legend()
+plt.gca().legend()
 
 #plt.savefig("plots/dum.png")

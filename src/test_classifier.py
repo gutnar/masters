@@ -16,17 +16,33 @@ classifier = Classifier()
 classifier.fit(train_galaxies)
 
 #%%
-for i in range(10):
-    q_pdf = classifier.predict_pdf(test_galaxies.iloc[[i*13]])
-    plt.plot(q_pdf.x, q_pdf.y)
+q_pdf = classifier.predict_pdf(test_galaxies.iloc[[17]])
+plt.plot(q_pdf.x, q_pdf.y)
 
 #%%
 start = time()
 ba = BayesianApproximation(q_pdf)
-ba.run([(150000, 0.05)]*50)
+ba.run([(150000, 0.05)]*25)
 print(time() - start)
 
 plot_ba_results(ba)
 
 #%%
 plot_xz_kde(ba)
+
+#%%
+plot_qt_kde(ba)
+
+#%%
+plot_qp_kde(ba)
+
+#%%
+t_pdf = ba.get_t_pdf(0.8)
+plt.plot(t_pdf.x, t_pdf.y, label=r"$\theta$")
+plt.legend()
+
+#%%
+p_pdf = ba.get_p_pdf(0.8)
+plt.plot(p_pdf.x, p_pdf.y, label=r"$\phi$")
+plt.hist(p_pdf.sample(100000), 100, (-np.pi/2, np.pi/2), True)
+plt.legend()

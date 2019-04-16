@@ -16,10 +16,10 @@ class SampleApproximator:
         t_pdf = self.ba.get_t_pdf(galaxy["ba"])
         p_pdf = self.ba.get_p_pdf(galaxy["ba"])
 
-        return np.column_stack((
+        return (
             t_pdf.sample(N),
             p_pdf.sample(N)
-        ))
+        )
 
 
 class ClassifierApproximator:
@@ -36,7 +36,15 @@ class ClassifierApproximator:
         t_pdf = ba.get_t_pdf(galaxy["ba"])
         p_pdf = ba.get_p_pdf(galaxy["ba"])
         
-        return np.column_stack((
+        return (
             t_pdf.sample(N),
             p_pdf.sample(N)
-        ))
+        )
+
+
+class RandomApproximator:
+    def sample_tp(self, galaxy, N):
+        return (
+            np.arccos(np.random.uniform(0, 1, N)),
+            np.random.uniform(-np.pi/2, np.pi/2, N)
+        )
