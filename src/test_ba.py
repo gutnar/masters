@@ -6,7 +6,8 @@ from lib import BayesianApproximation, PDF
 from lib.plotting import *
 
 #%%
-galaxies = pd.read_csv("data/raw/data_gama_gal_orient.txt", r"\s+")
+#galaxies = pd.read_csv("data/raw/data_gama_gal_orient.txt", r"\s+")
+galaxies = pd.read_csv("data/intermediate/elliptic_galaxies.csv")
 
 q_pdf = PDF.from_samples(
     np.linspace(0, 1, 100),

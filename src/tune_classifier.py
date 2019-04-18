@@ -43,9 +43,6 @@ train_galaxies = galaxies[~galaxies["id"].isin(test_galaxies["id"])]
 len(train_galaxies), len(test_galaxies)
 
 #%%
-train_galaxies.to_csv("data/intermediate/train_galaxies.csv", index=False)
-
-#%%
 p = []
 s = (10, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100)
 c = [0.5885791171856672] + list((1/np.array(s))[1:])

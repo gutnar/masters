@@ -16,7 +16,8 @@ classifier = Classifier()
 classifier.fit(train_galaxies)
 
 #%%
-q_pdf = classifier.predict_pdf(test_galaxies.iloc[[17]])
+elliptic_galaxies = pd.read_csv("data/intermediate/elliptic_galaxies.csv")
+q_pdf = classifier.predict_pdf(test_galaxies.iloc[[0]])
 plt.plot(q_pdf.x, q_pdf.y)
 
 #%%
