@@ -26,6 +26,16 @@ elif sys.argv[4] == "classifier":
     approximator = ClassifierApproximator(pd.read_csv("data/intermediate/train_galaxies.csv"))
 elif sys.argv[4] == "random":
     approximator = RandomApproximator()
+elif sys.argv[4] == "classifier10":
+    approximator = ClassifierApproximator(pd.read_csv("data/intermediate/train_galaxies.csv"),
+        q_slot_multiplier=10,
+        n_estimators=8,
+        max_depth=28,
+        max_features=5,
+        min_samples_leaf=1,
+        min_samples_split=2,
+        bootstrap=True
+    )
 
 #%%
 def process_galaxies(galaxies):

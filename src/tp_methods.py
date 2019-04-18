@@ -24,8 +24,8 @@ class SampleApproximator:
 
 
 class ClassifierApproximator:
-    def __init__(self, galaxies):
-        self.classifier = Classifier()
+    def __init__(self, galaxies, **kwargs):
+        self.classifier = Classifier(**kwargs)
         self.classifier.fit(galaxies)
 
     def sample_tp(self, galaxy, N):

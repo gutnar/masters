@@ -9,11 +9,12 @@ from lib.pdf import PDF
 class Classifier:
     def __init__(self,
         q_slot_multiplier=25,
-        n_estimators=11,#16,
-        max_depth=10,#32,
-        min_samples_split=0.01,#0.018,#0.001,
-        min_samples_leaf=0.01,#0.001,
-        max_features=3,#"auto",
+        n_estimators=11,
+        max_depth=11,
+        min_samples_split=600,
+        min_samples_leaf=100,
+        max_features=4,
+        bootstrap=False,
         parameters=["rmag", "rabsmag", "redshift", "rad", "sern"]):
         self.q_slot_multiplier = q_slot_multiplier
         self.parameters = parameters
@@ -25,6 +26,7 @@ class Classifier:
             min_samples_split=min_samples_split,
             min_samples_leaf=min_samples_leaf,
             max_features=max_features,
+            bootstrap=bootstrap,
             n_jobs=-1
         )
     
@@ -35,6 +37,12 @@ class Classifier:
     def score(self, galaxies):
         q_slots = galaxies["ba"].multiply(self.q_slot_multiplier).apply(np.ceil).astype(int) - 1
         return self.clf.score(galaxies[self.parameters].values, q_slots.values)
+    
+    def evaluate(self, galaxies):
+        q_slots = galaxies["ba"].multiply(self.q_slot_multiplier).apply(np.ceil).astype(int) - 1
+        return np.sum(
+            self.clf.predict_proba(galaxies[self.parameters].values)[range(len(q_slots)), q_slots]
+        ) / len(galaxies)
     
     def predict_pdf(self, galaxy):
         pdf = self.clf.predict_proba(galaxy[self.parameters].values.reshape(1, -1))[0] * self.q_slot_multiplier
