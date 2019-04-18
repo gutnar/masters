@@ -10,21 +10,44 @@ from sklearn.model_selection import RandomizedSearchCV
 def evaluate(estimator, X, y):
     return np.sum(estimator.predict_proba(X)[range(len(y)), y]) / len(y)
 
+
+def test_parameter(param, values, kwargs={}):
+    train_results = []
+    test_results = []
+
+    for value in values:
+        kwargs[param] = value
+        rf = Classifier(**kwargs)
+        rf.fit(train_galaxies)
+        train_results.append(rf.evaluate(train_galaxies))
+        test_results.append(rf.evaluate(test_galaxies))
+        print(value)
+    
+    plt.figure(1)
+    plt.title("%s train score" % param)
+    plt.plot(values, train_results)
+
+    plt.figure(2)
+    plt.title("%s test score" % param)
+    plt.plot(values, test_results)
+    plt.legend()
+
 #%% Load galaxies
 galaxies = pd.read_csv("data/raw/data_gama_gal_orient.txt", r"\s+")
-test_galaxies = pd.read_csv("data/intermediate/filament_galaxies.csv")
+spiral_galaxies = pd.read_csv("data/raw/gama_spiral.txt", r"\s+")
+elliptic_galaxies = pd.read_csv("data/raw/gama_elliptic.txt", r"\s+")
+
+test_galaxies = pd.merge(pd.concat((spiral_galaxies, elliptic_galaxies)), galaxies, on="id")
 train_galaxies = galaxies[~galaxies["id"].isin(test_galaxies["id"])]
 
-#%%
-#np.random.seed(0b11011100000011011011000001110000)
-#training_set = np.random.rand(len(galaxies)) < 0.75
+len(train_galaxies), len(test_galaxies)
 
-#train_galaxies = galaxies[training_set]
-#test_galaxies = galaxies[~training_set]
+#%%
+train_galaxies.to_csv("data/intermediate/train_galaxies.csv", index=False)
 
 #%%
 p = []
-s = (10, 20, 30, 40, 50, 60, 70, 80, 90, 100)
+s = (10, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100)
 c = [0.5885791171856672] + list((1/np.array(s))[1:])
 
 for slots in s:
@@ -34,7 +57,9 @@ for slots in s:
 
 plt.plot(s, 1/np.array(s))
 plt.plot(s, p)
-plt.plot(s, c)
+#plt.plot(s, c)
+
+p[2]
 
 #%% Manual fit
 classifier = Classifier()
@@ -57,7 +82,7 @@ rs_classifier.clf = RandomizedSearchCV(
     estimator=classifier.clf,
     param_distributions=param_distributions,
     n_iter=1000,
-    cv=3,
+    cv=5,
     verbose=2,
     n_jobs=-1,
     scoring=evaluate
@@ -71,28 +96,6 @@ print(rs_classifier.evaluate(train_galaxies), rs_classifier.evaluate(test_galaxi
 
 #%%
 plt.plot(rs_classifier.predict_pdf(test_galaxies.iloc[[120]]).y)
-
-#%%
-def test_parameter(param, values, kwargs={}):
-    train_results = []
-    test_results = []
-
-    for value in values:
-        kwargs[param] = value
-        rf = Classifier(**kwargs)
-        rf.fit(train_galaxies)
-        train_results.append(rf.evaluate(train_galaxies))
-        test_results.append(rf.evaluate(test_galaxies))
-        print(value)
-    
-    plt.figure(1)
-    plt.title("%s train score" % param)
-    plt.plot(values, train_results)
-
-    plt.figure(2)
-    plt.title("%s test score" % param)
-    plt.plot(values, test_results)
-    plt.legend()
 
 #%%
 test_parameter("n_estimators", [8, 9, 10, 11, 12, 13, 14, 15, 16], {
