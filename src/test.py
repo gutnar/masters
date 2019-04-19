@@ -20,6 +20,8 @@ plt.hist(galaxies["sern"], 100, histtype="step")
 
 galaxies.describe()
 
+galaxies.to_csv("data/intermediate/filament_galaxies.csv", index=False)
+
 #%%
 elliptic.describe()
 
@@ -34,7 +36,8 @@ import matplotlib.pyplot as plt
 import lib
 import analytical
 
-galaxies = pd.read_csv("data/intermediate/spiral.csv")
+galaxies = pd.read_csv("data/intermediate/filament_galaxies.csv")
+galaxies = galaxies
 
 dum = []
 
@@ -65,3 +68,23 @@ plt.hist(np.concatenate(lib.get_dum(
     galaxies["ey"],
     galaxies["ez"]
 )), 100, density=True, histtype="step")
+
+#%%
+values = np.array([])
+
+for i in range(1000):
+    dum1, dum2 = lib.get_dum(
+        galaxies["ra"],
+        galaxies["dec"],
+        np.random.uniform(0, np.pi),
+        np.arccos(np.random.uniform(0, 1)),
+        galaxies["gama"],
+        galaxies["ex"],
+        galaxies["ey"],
+        galaxies["ez"]
+    )
+
+    values = np.concatenate((values, dum1, dum2))
+
+plt.ylim((0.95, 1.05))
+plt.hist(values, 100, density=True, histtype="step")
