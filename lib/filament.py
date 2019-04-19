@@ -58,8 +58,8 @@ def get_rotated_gama_coordinates_crd(crd0, gama):
 
     # line of sight vector
     los = normalize(get_crd(ra0, dec0, 1.0))
-    crd = get_crd(ra0, dec0 - 1.0, 100.0)
-    crd2 = get_crd(ra0, dec0 + 1.0, 100.0)
+    crd = get_crd(ra0, dec0 - np.pi/180, 100.0)
+    crd2 = get_crd(ra0, dec0 + np.pi/180, 100.0)
     crd = crd2 - crd
     
     # crd projektsioon los suunal

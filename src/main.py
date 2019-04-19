@@ -4,6 +4,7 @@ import pandas as pd
 from time import time
 from multiprocessing import Pool
 from itertools import product
+from sklearn.preprocessing import normalize
 import os
 import sys
 
@@ -14,32 +15,26 @@ from tp_methods import *
 
 #%%
 processes = int(sys.argv[1])
-samples_per_galaxy = int(sys.argv[2])
-hist_bins = np.linspace(0, 1, 100)
+samples_per_galaxy = 10000
+
+max_sern = 20
+sern_bins = np.linspace(0, max_sern, 51)
+dum_bins = np.linspace(0, 1, 101)
 
 #%%
-if sys.argv[4] == "global":
+if sys.argv[3] == "global":
     approximator = SampleApproximator(pd.read_csv("data/raw/data_gama_gal_orient.txt", r"\s+"))
-elif sys.argv[4] == "sample":
-    approximator = SampleApproximator(pd.read_csv("data/intermediate/%s.csv" % sys.argv[3]))
-elif sys.argv[4] == "classifier":
+elif sys.argv[3] == "sample":
+    approximator = SampleApproximator(pd.read_csv("data/intermediate/%s.csv" % sys.argv[2]))
+elif sys.argv[3] == "classifier":
     approximator = ClassifierApproximator(pd.read_csv("data/intermediate/train_galaxies.csv"))
-elif sys.argv[4] == "random":
+elif sys.argv[3] == "random":
     approximator = RandomApproximator()
-elif sys.argv[4] == "classifier10":
-    approximator = ClassifierApproximator(pd.read_csv("data/intermediate/train_galaxies.csv"),
-        q_slot_multiplier=10,
-        n_estimators=8,
-        max_depth=28,
-        max_features=5,
-        min_samples_leaf=1,
-        min_samples_split=2,
-        bootstrap=True
-    )
 
 #%%
 def process_galaxies(galaxies):
-    dum_hist = np.zeros(len(hist_bins) - 1)
+    hist = np.zeros((len(sern_bins) - 1, len(dum_bins) - 1))
+    #dum_hist = np.zeros(len(dum_bins) - 1)
     
     for i, galaxy in galaxies.iterrows():
         t, p = approximator.sample_tp(galaxy, samples_per_galaxy)
@@ -54,28 +49,34 @@ def process_galaxies(galaxies):
             np.repeat(galaxy["ez"], samples_per_galaxy)
         ))
 
-        dum_hist += np.histogram(dum, hist_bins)[0]
+        hist[int(galaxy["sern"]/(max_sern+0.000000000001)*(len(sern_bins) - 1))] += np.histogram(dum, dum_bins)[0]
 
-    return dum_hist
+        #dum_hist += np.histogram(dum, dum_bins)[0]
+
+    return hist
 
 #%%
 if __name__ == "__main__":
-    galaxies = pd.read_csv("data/intermediate/%s.csv" % sys.argv[3])
+    galaxies = pd.read_csv("data/intermediate/%s.csv" % sys.argv[2])
     #galaxies = galaxies[:4]
 
     pool = Pool(processes)
     chunks = np.array_split(galaxies, processes)
 
     start = time()
-    dum_hist = np.sum(
+    hist = np.sum(
         pool.map(process_galaxies, chunks), axis=0
-    ) / len(galaxies) / samples_per_galaxy / 2
+    )
     print(time() - start)
 
-    results = pd.DataFrame({
-        "min": hist_bins[:-1],
-        "max": hist_bins[1:],
-        "N": dum_hist
-    })
+    hist = normalize(hist, norm="l1")
 
-    results.to_csv("data/final/%s_%s.csv" % (sys.argv[3], sys.argv[4]), index=False)
+    #results = pd.DataFrame({
+    #    "min": hist_bins[:-1],
+    #    "max": hist_bins[1:],
+    #    "N": dum_hist
+    #})
+    results = pd.DataFrame(hist)
+
+    results.to_csv("data/final/%s_%s.csv" % (sys.argv[2], sys.argv[3]), index=False)
+    #results.to_csv("data/final/test.csv", index=False)

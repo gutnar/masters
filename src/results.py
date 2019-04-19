@@ -12,31 +12,34 @@ plt.rcParams["font.size"] = 16
 #%%
 f = 0
 
-for m in ("filament", "elliptic"):
+for m in ("spiral", "elliptic"):
     results = {
-        "random": pd.read_csv("data/final/%s_galaxies_random.csv" % m),
-        "global": pd.read_csv("data/final/%s_galaxies_global.csv" % m),
-        "classifier": pd.read_csv("data/final/%s_galaxies_classifier.csv" % m)
+        "random": pd.read_csv("data/final/%s_random.csv" % m),
+        "global": pd.read_csv("data/final/%s_global.csv" % m),
+        "classifier": pd.read_csv("data/final/%s_classifier.csv" % m)
     }
 
-    galaxies = pd.read_csv("data/intermediate/%s_galaxies.csv" % m)
-    ba_results = np.histogram(np.concatenate(get_dum(
-        galaxies["ra"],
-        galaxies["dec"],
-        galaxies["pos"],
-        galaxies["ba"],
-        galaxies["gama"],
-        galaxies["ex"],
-        galaxies["ey"],
-        galaxies["ez"]
-    )), 100, (0, 1))[0]
+    """
+    galaxies = pd.read_csv("data/intermediate/%s.csv" % m)
 
-    plt.figure(f*3 + 3)
-    plt.plot(ba_results)
+    results["ba"] = pd.DataFrame({
+        "max": np.linspace(0, 1, 100),
+        "N": np.histogram(np.concatenate(get_dum(
+            galaxies["ra"],
+            galaxies["dec"],
+            galaxies["pos"] / 180 * np.pi,
+            np.arccos(galaxies["ba"]),
+            galaxies["gama"],
+            galaxies["ex"],
+            galaxies["ey"],
+            galaxies["ez"]
+        )), 100, (0, 1), True)[0] / 100
+    })
+    """
 
     for method in results:
-        plt.figure(f*3 + 1)
-        plt.title("DUM")
+        plt.figure(f*2 + 1)
+        plt.title("%s" % m)
         plt.plot(
             results[method]["max"],
             results[method]["N"],
@@ -44,8 +47,8 @@ for m in ("filament", "elliptic"):
         )
         plt.gca().legend()
 
-        plt.figure(f*3 + 2)
-        plt.title("DUM relative to random results")
+        plt.figure(f*2 + 2)
+        plt.title("%s relative to random results" % m)
         plt.plot(
             results[method]["max"],
             results[method]["N"] / results["random"]["N"],
