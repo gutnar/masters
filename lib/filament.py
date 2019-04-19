@@ -4,7 +4,7 @@ from sklearn.preprocessing import normalize
 
 #%%
 def calc_gal_spin_vec(ra, dec, pos, inc):
-    #pos = (pos + np.pi) % np.pi
+    pos = (pos + np.pi) % np.pi
 
     # Find the components of unit spin vectors in the local
     # topocentric coordinate frame.
@@ -76,11 +76,11 @@ def get_rotated_gama_coordinates_crd(crd0, gama):
     
 	# risti vektorid on los, ex, ey
 	# projekteerime koordinaadid ümber
-    return normalize(np.sum(np.array([
+    return np.sum(np.array([
         crd0 * ex,
         crd0 * ey,
         crd0 * los,
-    ]), axis=0)[:,::-1], axis=1)
+    ]).T, axis=0)[:,::-1]
 
 #%%
 def get_dum(ra, dec, phi, theta, gama, ex, ey, ez):
