@@ -69,8 +69,6 @@ if __name__ == "__main__":
     )
     print(time() - start)
 
-    hist = normalize(hist, norm="l1")
-
     #results = pd.DataFrame({
     #    "min": hist_bins[:-1],
     #    "max": hist_bins[1:],
