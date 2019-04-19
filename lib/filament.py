@@ -76,11 +76,11 @@ def get_rotated_gama_coordinates_crd(crd0, gama):
     
 	# risti vektorid on los, ex, ey
 	# projekteerime koordinaadid ümber
-    return np.sum(np.array([
+    return np.array([
         crd0 * ex,
         crd0 * ey,
         crd0 * los,
-    ]).T, axis=0)[:,::-1]
+    ]).T.sum(axis=0)
 
 #%%
 def get_dum(ra, dec, phi, theta, gama, ex, ey, ez):
