@@ -14,6 +14,29 @@ plt.hist(spiral["ba"], 100, (0, 1), True, histtype="step")
 plt.hist(elliptic["ba"], 100, (0, 1), True, histtype="step")
 
 #%%
+plt.hist(np.concatenate(lib.get_dum(
+    spiral["ra"],
+    spiral["dec"],
+    spiral["pos"] / 180 * np.pi,
+    np.arccos(spiral["ba"]),
+    spiral["gama"],
+    spiral["ex"],
+    spiral["ey"],
+    spiral["ez"]
+)), 100, density=True, histtype="step")
+
+plt.hist(np.concatenate(lib.get_dum(
+    elliptic["ra"],
+    elliptic["dec"],
+    elliptic["pos"] / 180 * np.pi,
+    np.arccos(elliptic["ba"]),
+    elliptic["gama"],
+    elliptic["ex"],
+    elliptic["ey"],
+    elliptic["ez"]
+)), 100, density=True, histtype="step")
+
+#%%
 galaxies = pd.concat((spiral, elliptic))
 
 plt.hist(galaxies["sern"], 100, histtype="step")
@@ -72,7 +95,7 @@ plt.hist(np.concatenate(lib.get_dum(
 #%%
 values = np.array([])
 
-for i in range(1000):
+for i in range(100):
     dum1, dum2 = lib.get_dum(
         galaxies["ra"],
         galaxies["dec"],
@@ -86,5 +109,5 @@ for i in range(1000):
 
     values = np.concatenate((values, dum1, dum2))
 
-plt.ylim((0.95, 1.05))
+#plt.ylim((0.95, 1.05))
 plt.hist(values, 100, density=True, histtype="step")

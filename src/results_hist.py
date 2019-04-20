@@ -7,7 +7,7 @@ from lib import get_dum
 
 #%%
 hist_random = pd.read_csv("data/final/filament_galaxies_random.csv")
-hist_global = pd.read_csv("data/final/filament_galaxies_global.csv")
+hist_global = pd.read_csv("data/final/filament_galaxies_global_0.99.csv")
 hist_classifier = pd.read_csv("data/final/filament_galaxies_classifier.csv")
 
 plt.figure(1)

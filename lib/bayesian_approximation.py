@@ -68,6 +68,10 @@ class BayesianApproximation:
         # Generate qt and qp kde
         q, x, z, p, t = self.sample(method[0])
 
+        self.qx_kde = stats.kde.gaussian_kde(
+            np.column_stack((q, x)).T, 0.05
+        )
+
         self.qt_kde = stats.kde.gaussian_kde(
             np.column_stack((q, t)).T, 0.05
         )
@@ -83,8 +87,8 @@ class BayesianApproximation:
             (np.repeat(q, values), x
         )).T)
 
-        return PDF(x, y + np.flip(y))
-    
+        return PDF(x, (y + np.flip(y)) / y.sum() / 2)
+
     @classmethod
     def get_p_pdf(self, q, values=100):
         x = np.linspace(-np.pi/2, np.pi/2, values)
@@ -92,4 +96,13 @@ class BayesianApproximation:
             (np.repeat(q, values), x
         )).T)
 
-        return PDF(x, y + np.flip(y))
+        return PDF(x, (y + np.flip(y)) / y.sum() / 2)
+    
+    @classmethod
+    def get_x_pdf(self, q, values=100):
+        x = np.linspace(0, 1, values)
+        y = self.qx_kde(np.column_stack(
+            (np.repeat(q, values), x
+        )).T)
+
+        return PDF(x, y / y.sum())
