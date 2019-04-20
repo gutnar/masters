@@ -14,14 +14,7 @@ class SampleApproximator:
         self.ba.run()
     
     def sample_tp(self, galaxy, N):
-        t_pdf = self.ba.get_t_pdf(galaxy["ba"])
-        p_pdf = self.ba.get_p_pdf(galaxy["ba"])
-
-        return (
-            t_pdf.sample(N),
-            np.random.uniform(-np.pi/2, np.pi/2, N)
-            #p_pdf.sample(N)
-        )
+        return self.ba.sample_tp(galaxy["ba"], N)
 
 
 class ClassifierApproximator:
@@ -35,14 +28,7 @@ class ClassifierApproximator:
         ba = BayesianApproximation(q_pdf)
         ba.run()
 
-        t_pdf = ba.get_t_pdf(galaxy["ba"])
-        p_pdf = ba.get_p_pdf(galaxy["ba"])
-        
-        return (
-            t_pdf.sample(N),
-            np.random.uniform(-np.pi/2, np.pi/2, N)
-            #p_pdf.sample(N)
-        )
+        return ba.sample_tp(galaxy["ba"], N)
 
 
 class RandomApproximator:

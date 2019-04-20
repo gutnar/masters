@@ -73,3 +73,36 @@ plt.hist(np.arccos(
 #%%
 plt.hist(p_pdf.sample(10000), 100, (-np.pi/2, np.pi/2), True)
 plt.plot(p_pdf.x, p_pdf.y * 8)
+
+#%%
+t, p = ba.sample_tp(1, 10000)
+
+kde = stats.kde.gaussian_kde(
+    np.column_stack((t, p)).T, "scott"
+)
+
+TP_MESH = np.meshgrid(
+    np.linspace(-np.pi/2, np.pi/2, 100),
+    np.linspace(-np.pi/2, np.pi/2, 100)
+)
+TP_GRID = np.column_stack((
+    TP_MESH[0].reshape(-1, 1),
+    TP_MESH[1].reshape(-1, 1)
+))
+
+plot_kde(kde, TP_GRID, True)
+
+#%%
+q_m = 0.9
+
+TP_MESH = np.meshgrid(
+    np.linspace(-np.pi/2, np.pi/2, 100),
+    np.linspace(-np.pi/2, np.pi/2, 100)
+)
+TP_GRID = np.column_stack((
+    np.repeat(q_m, 10000),
+    TP_MESH[0].reshape(-1, 1),
+    TP_MESH[1].reshape(-1, 1)
+))
+
+plt.imshow(kde(TP_GRID.T).reshape(100, 100), origin="lower")

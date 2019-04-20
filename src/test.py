@@ -17,7 +17,8 @@ plt.hist(elliptic["ba"], 100, (0, 1), True, histtype="step")
 plt.hist(np.concatenate(lib.get_dum(
     spiral["ra"],
     spiral["dec"],
-    spiral["pos"] / 180 * np.pi,
+    np.random.uniform(-np.pi/2, np.pi/2, len(spiral)),
+    #spiral["pos"] / 180 * np.pi,
     np.arccos(spiral["ba"]),
     spiral["gama"],
     spiral["ex"],
@@ -28,7 +29,8 @@ plt.hist(np.concatenate(lib.get_dum(
 plt.hist(np.concatenate(lib.get_dum(
     elliptic["ra"],
     elliptic["dec"],
-    elliptic["pos"] / 180 * np.pi,
+    np.random.uniform(-np.pi/2, np.pi/2, len(elliptic)),
+    #elliptic["pos"] / 180 * np.pi,
     np.arccos(elliptic["ba"]),
     elliptic["gama"],
     elliptic["ex"],
