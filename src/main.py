@@ -42,7 +42,8 @@ def process_galaxies(galaxies):
         dum = np.concatenate(get_dum(
             np.repeat(galaxy["ra"], samples_per_galaxy),
             np.repeat(galaxy["dec"], samples_per_galaxy),
-            p, t,
+            np.repeat(galaxy["pos"], samples_per_galaxy) / 180 * np.pi,
+            t,
             np.repeat(galaxy["gama"], samples_per_galaxy),
             np.repeat(galaxy["ex"], samples_per_galaxy),
             np.repeat(galaxy["ey"], samples_per_galaxy),
