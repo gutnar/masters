@@ -19,7 +19,8 @@ class SampleApproximator:
 
         return (
             t_pdf.sample(N),
-            p_pdf.sample(N)
+            np.random.uniform(-np.pi/2, np.pi/2, N)
+            #p_pdf.sample(N)
         )
 
 
@@ -39,7 +40,8 @@ class ClassifierApproximator:
         
         return (
             t_pdf.sample(N),
-            p_pdf.sample(N)
+            np.random.uniform(-np.pi/2, np.pi/2, N)
+            #p_pdf.sample(N)
         )
 
 
