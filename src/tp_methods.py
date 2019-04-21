@@ -14,7 +14,7 @@ class SampleApproximator:
         self.ba.run()
     
     def sample_pos_inc(self, galaxy, N):
-        return self.ba.sample_pos_inc(galaxy["ba"], N)
+        return self.ba.sample_pos_inc(galaxy["ba"], galaxy["pos"], N)
 
 
 class ClassifierApproximator:
@@ -28,7 +28,7 @@ class ClassifierApproximator:
         ba = BayesianApproximation(q_pdf)
         ba.run()
 
-        return ba.sample_pos_inc(galaxy["ba"], N)
+        return ba.sample_pos_inc(galaxy["ba"], galaxy["pos"], N)
 
 
 class RandomApproximator:

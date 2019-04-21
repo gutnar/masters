@@ -139,8 +139,8 @@ def plot_tp_kde(ba, q, **kwargs):
     plot_kde(kde, TP_GRID, False, **kwargs)
 
 
-def plot_pos_inc_kde(ba, q, **kwargs):
-    pos, inc = ba.sample_pos_inc(q, 10000)
+def plot_pos_inc_kde(ba, proj_q, proj_pos, **kwargs):
+    pos, inc = ba.sample_pos_inc(proj_q, proj_pos, 10000)
 
     kde = stats.kde.gaussian_kde(
         np.column_stack((pos, inc)).T, "scott"

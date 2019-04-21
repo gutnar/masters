@@ -106,9 +106,9 @@ class BayesianApproximation:
         return tp_kde.resample(N)
     
     @classmethod
-    def sample_pos_inc(self, ba, N):
+    def sample_pos_inc(self, proj_q, proj_pos, N):
         q, x, z, p, t = self.sample(150000)
-        valid = (q > (ba - 0.05)) & (q < (ba + 0.05))
+        valid = (q > (proj_q - 0.05)) & (q < (proj_q + 0.05))
 
         kde = stats.kde.gaussian_kde(
             np.column_stack((
