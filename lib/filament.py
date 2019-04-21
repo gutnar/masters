@@ -83,9 +83,9 @@ def get_rotated_gama_coordinates_crd(crd0, gama):
     ]).T.sum(axis=0)
 
 #%%
-def get_dum(ra, dec, phi, theta, gama, ex, ey, ez):
+def get_dum(ra, dec, pos, inc, gama, ex, ey, ez):
     dvec1, dvec2 = calc_gal_spin_vec(
-        ra/180*np.pi, dec/180*np.pi, phi, theta
+        ra/180*np.pi, dec/180*np.pi, pos, np.arccos(inc)
     )
 
     crd1 = get_rotated_gama_coordinates_crd(dvec1, gama)

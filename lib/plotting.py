@@ -24,6 +24,15 @@ QP_GRID = np.append(
     QP_MESH[0].reshape(-1, 1), QP_MESH[1].reshape(-1, 1), 1
 )
 
+TP_MESH = np.meshgrid(
+    np.linspace(-np.pi/2, np.pi/2, 100),
+    np.linspace(-np.pi/2, np.pi/2, 100)
+)
+TP_GRID = np.column_stack((
+    TP_MESH[0].reshape(-1, 1),
+    TP_MESH[1].reshape(-1, 1)
+))
+
 
 def get_pdf(kde, grid, resample=False, N=10000):
     if resample:
@@ -97,3 +106,25 @@ def plot_qp_kde(ba, resample=True, **kwargs):
     )
 
     plot_kde(ba.qp_kde, QP_GRID, resample, aspect=1, **kwargs)
+
+
+def plot_tp_kde(ba, q, **kwargs):
+    t, p = ba.sample_tp(q, 10000)
+
+    kde = stats.kde.gaussian_kde(
+        np.column_stack((t, p)).T, "scott"
+    )
+
+    plt.xlabel(r"$\theta$")
+    plt.xticks(
+        [0, 19, 39, 59, 79, 99],
+        [(r"$%d^∘$" % t) for t in np.linspace(-90, 90, 6)]
+    )
+
+    plt.ylabel(r"$\phi$", rotation=0)
+    plt.yticks(
+        [0, 19, 39, 59, 79, 99],
+        [(r"$%d^∘$" % t) for t in np.linspace(-90, 90, 6)]
+    )
+
+    plot_kde(kde, TP_GRID, False, **kwargs)

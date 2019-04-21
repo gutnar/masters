@@ -87,7 +87,7 @@ plt.hist(np.concatenate(lib.get_dum(
     galaxies["ra"],
     galaxies["dec"],
     galaxies["pos"] / 180 * np.pi,
-    np.arccos(galaxies["ba"]),
+    galaxies["ba"],
     galaxies["gama"],
     galaxies["ex"],
     galaxies["ey"],
