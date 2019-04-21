@@ -117,4 +117,7 @@ class BayesianApproximation:
             )).T, "scott"
         )
 
-        return kde.resample(N)
+        pos, inc = kde.resample(N)
+        inc = np.maximum(0, np.minimum(1, inc))
+
+        return pos, inc
