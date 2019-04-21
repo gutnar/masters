@@ -33,6 +33,15 @@ TP_GRID = np.column_stack((
     TP_MESH[1].reshape(-1, 1)
 ))
 
+POS_INC_MESH = np.meshgrid(
+    np.linspace(-np.pi/2, np.pi/2, 100),
+    np.linspace(0, 1, 100)
+)
+POS_INC_GRID = np.column_stack((
+    POS_INC_MESH[0].reshape(-1, 1),
+    POS_INC_MESH[1].reshape(-1, 1)
+))
+
 
 def get_pdf(kde, grid, resample=False, N=10000):
     if resample:
@@ -128,3 +137,25 @@ def plot_tp_kde(ba, q, **kwargs):
     )
 
     plot_kde(kde, TP_GRID, False, **kwargs)
+
+
+def plot_pos_inc_kde(ba, q, **kwargs):
+    pos, inc = ba.sample_pos_inc(q, 10000)
+
+    kde = stats.kde.gaussian_kde(
+        np.column_stack((pos, inc)).T, "scott"
+    )
+
+    plt.xlabel("pos")
+    plt.xticks(
+        [0, 19, 39, 59, 79, 99],
+        [(r"$%d^∘$" % t) for t in np.linspace(-90, 90, 6)]
+    )
+
+    plt.ylabel("inc", rotation=0)
+    plt.yticks(
+        [0, 19, 39, 59, 79, 99],
+        [(r"$%.2f$" % t) for t in np.linspace(0, 1, 6)]
+    )
+
+    plot_kde(kde, POS_INC_GRID, False, **kwargs)

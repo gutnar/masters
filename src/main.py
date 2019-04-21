@@ -37,13 +37,13 @@ def process_galaxies(galaxies):
     #dum_hist = np.zeros(len(dum_bins) - 1)
     
     for i, galaxy in galaxies.iterrows():
-        t, p = approximator.sample_tp(galaxy, samples_per_galaxy)
+        pos, inc = approximator.sample_pos_inc(galaxy, samples_per_galaxy)
 
         dum = np.concatenate(get_dum(
             np.repeat(galaxy["ra"], samples_per_galaxy),
             np.repeat(galaxy["dec"], samples_per_galaxy),
-            p,
-            t,
+            pos,
+            inc,
             np.repeat(galaxy["gama"], samples_per_galaxy),
             np.repeat(galaxy["ex"], samples_per_galaxy),
             np.repeat(galaxy["ey"], samples_per_galaxy),

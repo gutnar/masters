@@ -39,6 +39,12 @@ plot_qt_kde(ba)
 plot_qp_kde(ba)
 
 #%%
+plot_pos_inc_kde(ba, 0.1)
+
+#%%
+plot_pos_inc_kde(ba, 0.9)
+
+#%%
 plt.title(r"$\theta$")
 
 for q in (0.1, 0.25, 0.5, 0.75, 0.9):
@@ -73,6 +79,3 @@ plt.hist(np.arccos(
 #%%
 plt.hist(p_pdf.sample(10000), 100, (-np.pi/2, np.pi/2), True)
 plt.plot(p_pdf.x, p_pdf.y * 8)
-
-#%%
-plot_tp_kde(ba, 0.9)
