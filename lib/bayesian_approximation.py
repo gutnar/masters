@@ -112,7 +112,8 @@ class BayesianApproximation:
 
         kde = stats.kde.gaussian_kde(
             np.column_stack((
-                np.random.uniform(-np.pi/2, np.pi, sum(valid)),
+                p[valid] + np.pi/2,
+                #np.random.uniform(-np.pi/2, np.pi, sum(valid)),
                 np.abs(np.cos(t[valid]))
             )).T, "scott"
         )

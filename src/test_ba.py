@@ -18,14 +18,8 @@ plt.hist(galaxies["ba"].values, 100, (0, 1), density=True)
 plt.plot(q_pdf.x, q_pdf.y)
 
 #%%
-from time import time
-
-start = time()
 ba = BayesianApproximation(q_pdf)
-#ba.Z_MIN = 0.99
-#ba.run([(1000, "scott")]*100)
 ba.run([(150000, 0.05)]*25)
-print(time() - start)
 
 plot_ba_results(ba)
 
