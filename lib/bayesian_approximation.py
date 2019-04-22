@@ -108,6 +108,13 @@ class BayesianApproximation:
     @classmethod
     def sample_pos_inc(self, proj_q, proj_pos, N):
         q, x, z, p, t = self.sample(150000)
+
+        return (
+            np.repeat(proj_pos, N),
+            np.sqrt(np.maximum(0, (proj_q**2 - x**2) / (1 - x**2)))
+        )
+
+        '''
         valid = (q > (proj_q - 0.05)) & (q < (proj_q + 0.05))
 
         kde = stats.kde.gaussian_kde(
@@ -122,3 +129,4 @@ class BayesianApproximation:
         inc = np.maximum(0, np.minimum(1, inc))
 
         return pos, inc
+        '''
