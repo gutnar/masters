@@ -107,7 +107,7 @@ class BayesianApproximation:
     
     @classmethod
     def sample_pos_inc(self, proj_q, proj_pos, N):
-        q, x, z, p, t = self.sample(150000)
+        q, x, z, p, t = self.sample(N)
 
         return (
             np.repeat(proj_pos, N),
