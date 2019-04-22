@@ -12,6 +12,10 @@ def calc_gal_spin_vec(ra, dec, pos, inc):
     v = np.sin(inc) * np.sin(pos)
     w = np.cos(inc) # pointing away from Earth
 
+    # u = cos(phi) * sin(theta) * cos(pos)
+    # v = cos(phi) * sin(theta) * sin(pos)
+    # w = sin(phi) * 
+
     # Compute to alternate endpoints if the vectors were shifted
     # to the origin of the GEI frame.
 
