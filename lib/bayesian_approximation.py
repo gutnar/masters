@@ -23,13 +23,14 @@ class BayesianApproximation:
         self.xz_kde = stats.kde.gaussian_kde(np.column_stack((x, z)).T)
 
     @classmethod
-    def sample(self, N):
+    def sample(self, N, validate=True):
         x, z = self.xz_kde.resample(N)
-        valid = (x > 0) & (x < z) & (z > self.Z_MIN) & (z < 1)
 
-        x = x[valid]
-        z = z[valid]
-        N = len(x)
+        if validate:
+            valid = (x > 0) & (x < z) & (z > self.Z_MIN) & (z < 1)
+            x = x[valid]
+            z = z[valid]
+            N = len(x)
         
         p = np.random.uniform(-np.pi, np.pi, N)
         t = np.concatenate((
@@ -107,11 +108,12 @@ class BayesianApproximation:
     
     @classmethod
     def sample_pos_inc(self, proj_q, proj_pos, N):
-        q, x, z, p, t = self.sample(N)
+        #q, x, z, p, t = self.sample(N)
+        x, z = self.xz_kde.resample(N)
 
         return (
             np.repeat(proj_pos, N),
-            np.sqrt(np.maximum(0, (proj_q**2 - x**2) / (1 - x**2)))
+            np.sqrt(np.maximum(0, np.minimum(1, (proj_q**2 - x**2) / (1 - x**2))))
         )
 
         '''
