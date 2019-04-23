@@ -10,6 +10,13 @@ XZ_GRID = np.append(
     XZ_MESH[0].reshape(-1, 1), XZ_MESH[1].reshape(-1, 1), 1
 )
 
+QI_MESH = np.meshgrid(
+    np.linspace(0, 1, 100), np.linspace(0, 1, 100)
+)
+QI_GRID = np.append(
+    QI_MESH[0].reshape(-1, 1), QI_MESH[1].reshape(-1, 1), 1
+)
+
 QT_MESH = np.meshgrid(
     np.linspace(0, 1, 100), np.linspace(-np.pi/2, np.pi/2, 100)
 )
@@ -109,6 +116,22 @@ def plot_qt_kde(ba, resample=True, **kwargs):
     )
 
     plot_kde(ba.qt_kde, QT_GRID, resample, aspect=1, **kwargs)
+
+
+def plot_qi_kde(ba, resample=True, **kwargs):
+    plt.xlabel(r"$q$")
+    plt.xticks(
+        [0, 19, 39, 59, 79, 99],
+        ["0.0", "0.2", "0.4", "0.6", "0.8", "1.0"]
+    )
+
+    plt.ylabel(r"$i$", rotation=0)
+    plt.yticks(
+        [0, 19, 39, 59, 79, 99],
+        ["0.0", "0.2", "0.4", "0.6", "0.8", "1.0"]
+    )
+
+    plot_kde(ba.qi_kde, QI_GRID, resample, aspect=1, **kwargs)
 
 
 def plot_qp_kde(ba, resample=True, **kwargs):

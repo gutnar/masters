@@ -1,4 +1,3 @@
-
 #%%
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -19,11 +18,9 @@ plt.plot(q_pdf.x, q_pdf.y)
 
 #%%
 ba = BayesianApproximation1d(q_pdf)
-ba.run([(150000, 0.05)]*25)
+ba.run()#[(150000, 0.05)]*25)
 
 plot_ba_1d_results(ba)
 
 #%%
-i_pdf = ba.get_i_pdf(0.8)
-
-plt.plot(i_pdf.x, i_pdf.y)
+plot_qi_kde(ba)

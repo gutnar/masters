@@ -29,7 +29,7 @@ class SampleApproximator1d:
     
     def sample_pos_inc(self, galaxy, N):
         return (
-            np.repeat(galaxy["pos"], N),
+            np.repeat(galaxy["pos"] + np.pi/2, N),
             self.ba.get_i_pdf(galaxy["ba"]).sample(N)
         )
 
