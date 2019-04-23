@@ -24,10 +24,12 @@ dum_bins = np.linspace(0, 1, 101)
 #%%
 if sys.argv[3] == "global":
     approximator = SampleApproximator(pd.read_csv("data/raw/data_gama_gal_orient.txt", r"\s+"))
-elif sys.argv[3] == "sample":
-    approximator = SampleApproximator(pd.read_csv("data/intermediate/%s.csv" % sys.argv[2]))
+elif sys.argv[3] == "global1d":
+    approximator = SampleApproximator1d(pd.read_csv("data/raw/data_gama_gal_orient.txt", r"\s+"))
 elif sys.argv[3] == "classifier":
     approximator = ClassifierApproximator(pd.read_csv("data/intermediate/train_galaxies.csv"))
+elif sys.argv[3] == "classifier1d":
+    approximator = ClassifierApproximator1d(pd.read_csv("data/intermediate/train_galaxies.csv"))
 elif sys.argv[3] == "random":
     approximator = RandomApproximator()
 
@@ -59,7 +61,7 @@ def process_galaxies(galaxies):
 #%%
 if __name__ == "__main__":
     galaxies = pd.read_csv("data/intermediate/%s.csv" % sys.argv[2])
-    #galaxies = galaxies[:4]
+    galaxies = galaxies[:4]
 
     pool = Pool(processes)
     chunks = np.array_split(galaxies, processes)

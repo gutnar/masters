@@ -122,10 +122,10 @@ class BayesianApproximation:
             )).T, "scott"
         )
 
-        #return (
-        #    np.repeat(proj_pos, N),
-        #    np.sqrt(np.maximum(0, np.minimum(1, (proj_q**2 - x**2) / (1 - x**2))))
-        #)
+        return (
+            np.repeat(proj_pos, N),
+            np.sqrt(np.maximum(0, np.minimum(1, (proj_q**2 - x**2) / (1 - x**2))))
+        )
 
         '''
         valid = (q > (proj_q - 0.05)) & (q < (proj_q + 0.05))
@@ -139,7 +139,7 @@ class BayesianApproximation:
         )
         '''
 
-        pos, inc = kde.resample(N)
-        inc = np.maximum(0, np.minimum(1, inc))
+        #pos, inc = kde.resample(N)
+        #inc = np.maximum(0, np.minimum(1, inc))
 
-        return pos, inc
+        #return pos, inc

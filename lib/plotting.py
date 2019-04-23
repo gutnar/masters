@@ -64,6 +64,16 @@ def plot_ba_results(ba, size=150000):
     plt.gca().legend()
 
 
+def plot_ba_1d_results(ba, size=150000):
+    q, x, i = ba.sample(size)
+
+    plt.xlim((0, 1))
+    plt.plot(ba.q_pdf.x, ba.q_pdf.y, label="target")
+    plt.hist(q, 100, (0, 1), True, label=r"$q$", histtype="step")
+    plt.hist(i, 100, (0, 1), True, label=r"$i$", histtype="step")
+    plt.gca().legend()
+
+
 def plot_kde(kde, grid, resample=True, **kwargs):
     pdf = get_pdf(kde, grid, resample)
     plt.imshow(pdf, "magma", origin="lower", **kwargs)

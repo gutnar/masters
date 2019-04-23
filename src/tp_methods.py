@@ -1,6 +1,6 @@
 import numpy as np
 import math
-from lib import BayesianApproximation, PDF, Classifier
+from lib import *
 
 
 class SampleApproximator:
@@ -17,6 +17,23 @@ class SampleApproximator:
         return self.ba.sample_pos_inc(galaxy["ba"], galaxy["pos"], N)
 
 
+class SampleApproximator1d:
+    def __init__(self, galaxies):
+        q_pdf = PDF.from_samples(
+            np.linspace(0, 1, 100),
+            galaxies["ba"].values
+        )
+
+        self.ba = BayesianApproximation1d(q_pdf)
+        self.ba.run()
+    
+    def sample_pos_inc(self, galaxy, N):
+        return (
+            np.repeat(galaxy["pos"], N),
+            self.ba.get_i_pdf(galaxy["ba"]).sample(N)
+        )
+
+
 class ClassifierApproximator:
     def __init__(self, galaxies, **kwargs):
         self.classifier = Classifier(**kwargs)
@@ -29,6 +46,23 @@ class ClassifierApproximator:
         ba.run()
 
         return ba.sample_pos_inc(galaxy["ba"], galaxy["pos"], N)
+
+
+class ClassifierApproximator1d:
+    def __init__(self, galaxies, **kwargs):
+        self.classifier = Classifier(**kwargs)
+        self.classifier.fit(galaxies)
+
+    def sample_pos_inc(self, galaxy, N):
+        q_pdf = self.classifier.predict_pdf(galaxy)
+
+        ba = BayesianApproximation1d(q_pdf)
+        ba.run()
+
+        return (
+            np.repeat(galaxy["pos"], N),
+            ba.get_i_pdf(galaxy["ba"]).sample(N)
+        )
 
 
 class RandomApproximator:
