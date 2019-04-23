@@ -61,7 +61,7 @@ def process_galaxies(galaxies):
 #%%
 if __name__ == "__main__":
     galaxies = pd.read_csv("data/intermediate/%s.csv" % sys.argv[2])
-    galaxies = galaxies[:4]
+    #galaxies = galaxies[:4]
 
     pool = Pool(processes)
     chunks = np.array_split(galaxies, processes)
