@@ -14,7 +14,11 @@ class SampleApproximator:
         self.ba.run()
     
     def sample_pos_inc(self, galaxy, N):
-        return self.ba.sample_pos_inc(galaxy["ba"], galaxy["pos"], N)
+        return self.ba.sample_pos_inc(
+            galaxy["ba"],
+            galaxy["pos"]/180*np.pi,
+            N
+        )
 
 
 class SampleApproximator1d:
@@ -29,7 +33,7 @@ class SampleApproximator1d:
     
     def sample_pos_inc(self, galaxy, N):
         return (
-            np.repeat(galaxy["pos"] + np.pi/2, N),
+            np.repeat(galaxy["pos"]/180*np.pi, N),
             self.ba.get_i_pdf(galaxy["ba"]).sample(N)
         )
 
@@ -45,7 +49,11 @@ class ClassifierApproximator:
         ba = BayesianApproximation(q_pdf)
         ba.run()
 
-        return ba.sample_pos_inc(galaxy["ba"], galaxy["pos"], N)
+        return ba.sample_pos_inc(
+            galaxy["ba"],
+            galaxy["pos"]/180*np.pi,
+            N
+        )
 
 
 class ClassifierApproximator1d:
@@ -60,7 +68,7 @@ class ClassifierApproximator1d:
         ba.run()
 
         return (
-            np.repeat(galaxy["pos"], N),
+            np.repeat(galaxy["pos"]/180*np.pi, N),
             ba.get_i_pdf(galaxy["ba"]).sample(N)
         )
 
