@@ -2,7 +2,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from sympy import Symbol, symbols, sqrt, solve, Eq, cos, sin, lambdify, simplify, trigsimp, Abs
+from sympy import Symbol, symbols, sqrt, solve, Eq, cos, sin, tan, lambdify, simplify, trigsimp, Abs
 from helpers import get_truncnorm_sample
 from scipy.optimize import differential_evolution
 from time import time
@@ -24,6 +24,14 @@ E = q**2 * (A + C + D) - (A + C - D)
 
 #%%
 cos_t = solve(Eq(Q**2 * (A+C)**2, (A - C)**2 + B**2), t)
+
+#%%
+from sympy.abc import psi
+
+solve((
+    Eq(Q**2 * (A+C)**2, (A - C)**2 + B**2),
+    Eq(tan(2*psi)*(A - C), B)
+), (t, p))
 
 #%%
 trigsimp(cos_t[1])

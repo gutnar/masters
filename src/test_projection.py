@@ -6,7 +6,7 @@ from sympy import trigsimp, Symbol, symbols, sqrt, solve, Eq, cos, sin, tan, lam
 from sympy.matrices import Matrix
 from sympy.vector import Vector
 from sympy import init_printing
-from sympy.abc import xi, zeta, phi, theta
+from sympy.abc import xi, zeta, phi, theta, psi
 
 init_printing()
 
@@ -48,26 +48,9 @@ Q = Matrix((
     (B, C)
 ))
 
-P, D = Q.diagonalize()
-
-P = P.subs({
-    A: E[0, 0],
-    B: E[1, 0],
-    C: E[1, 1]
-})
-
-D = D.subs({
-    A: E[0, 0],
-    B: E[1, 0],
-    C: E[1, 1]
-})
-
-q = D[0, 0] / D[1, 1]
-
 Q_eigen = Q.eigenvects()
 
-#%%
-q = (
+q_expression = (
     (Q_eigen[0][0]) / 
     (Q_eigen[1][0])
 ).subs({
@@ -76,7 +59,14 @@ q = (
     C: E[1, 1]
 })
 
-get_q = lambdify((xi, zeta, theta, phi), q)
+psi_expression = atan(Q_eigen[0][2][0][1] / Q_eigen[0][2][0][0]).subs({
+    A: E[0, 0],
+    B: E[1, 0],
+    C: E[1, 1]
+})
+
+#%%
+get_q = lambdify((xi, zeta, theta, phi), q_expression)
 
 plt.ylim((0, 1))
 
@@ -85,7 +75,7 @@ plt.plot(
     get_q(
         0.1,
         0.9,
-        np.pi/2,
+        0,
         np.linspace(0, 2*np.pi, 100),
     )
 )
@@ -93,8 +83,33 @@ plt.plot(
 get_q(0.1, 0.9, np.pi/2, np.pi/2)
 
 #%%
+get_psi = lambdify((xi, zeta, theta, phi), psi_expression)
+
+x = np.linspace(0, 2*np.pi, 1000)
+y = get_psi(
+    0.1,
+    0.9,
+    np.pi/2,
+    np.linspace(0, 2*np.pi, 1000)
+)
+
+plt.plot(x, y)
+
+#%%
+q = Symbol("q")
+
+#sol = solve((
+#    Eq(q_expression, q),
+#    Eq(psi_expression, psi)
+#), (theta, phi))
+
+#%%
+R * Matrix(3, 1, (1, 0, 0))
+
+#%%
 import analytical
 
+plt.figure(1)
 plt.plot(
     np.linspace(0, 2*np.pi, 100),
     analytical.get_q(
@@ -105,5 +120,16 @@ plt.plot(
     )
 )
 
-#%%
+plt.figure(2)
+plt.plot(
+    np.linspace(0, 2*np.pi, 100),
+    analytical.get_psi(
+        0.1,
+        0.9,
+        0,
+        np.linspace(0, 2*np.pi, 100)
+    )
+)
 
+#%%
+solve(Eq(q_expression, q), theta)

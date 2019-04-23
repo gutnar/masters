@@ -10,7 +10,7 @@ from lib.pdf import PDF
 
 
 class BayesianApproximation:
-    Z_MIN = 0.6
+    Z_MIN = 0.85
 
     @classmethod
     def __init__(self, q_pdf, size=10000, z_mu=0.85, z_sigma=0.1):
@@ -108,13 +108,23 @@ class BayesianApproximation:
     
     @classmethod
     def sample_pos_inc(self, proj_q, proj_pos, N):
-        #q, x, z, p, t = self.sample(N)
-        x, z = self.xz_kde.resample(N)
+        q, x, z, p, t = self.sample(N)
+        #x, z = self.xz_kde.resample(N)
+        valid = (q > (proj_q - 0.05)) & (q < (proj_q + 0.05))
 
-        return (
-            np.repeat(proj_pos, N),
-            np.sqrt(np.maximum(0, np.minimum(1, (proj_q**2 - x**2) / (1 - x**2))))
+        kde = stats.kde.gaussian_kde(
+            np.column_stack((
+                np.repeat(proj_pos, sum(valid)),
+                #np.random.uniform(-np.pi/2, np.pi, sum(valid)),
+                #np.abs(np.cos(t[valid]))
+                np.sqrt(np.maximum(0, np.minimum(1, (proj_q**2 - x**2) / (1 - x**2))))
+            )).T, "scott"
         )
+
+        #return (
+        #    np.repeat(proj_pos, N),
+        #    np.sqrt(np.maximum(0, np.minimum(1, (proj_q**2 - x**2) / (1 - x**2))))
+        #)
 
         '''
         valid = (q > (proj_q - 0.05)) & (q < (proj_q + 0.05))
@@ -126,9 +136,9 @@ class BayesianApproximation:
                 np.abs(np.cos(t[valid]))
             )).T, "scott"
         )
+        '''
 
         pos, inc = kde.resample(N)
         inc = np.maximum(0, np.minimum(1, inc))
 
         return pos, inc
-        '''
