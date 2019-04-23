@@ -111,6 +111,7 @@ class BayesianApproximation:
         q, x, z, p, t = self.sample(N)
         #x, z = self.xz_kde.resample(N)
         valid = (q > (proj_q - 0.05)) & (q < (proj_q + 0.05))
+        x = x[valid]
 
         kde = stats.kde.gaussian_kde(
             np.column_stack((
