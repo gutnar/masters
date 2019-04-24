@@ -118,10 +118,10 @@ plt.hist(values, 100, density=True, histtype="step")
 import scipy.stats as stats
 
 kde = stats.kde.gaussian_kde(np.column_stack((
-    np.random.normal(0.2, 0.1, 100000),
-    np.random.normal(0.85, 0.1, 100000),
-    np.random.uniform(0, 1, 100000),
-    np.random.uniform(0, 1, 100000)
+    np.random.normal(0.2, 0.1, 1000000),
+    np.random.normal(0.85, 0.1, 1000000),
+    np.random.uniform(0, 1, 1000000),
+    np.random.uniform(0, 1, 1000000)
 )).T)
 
-kde.resample(10000).T
+kde.resample(1000000).T

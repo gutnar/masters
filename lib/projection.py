@@ -1,19 +1,13 @@
 #%%
 from sympy import Symbol, cos, sin, atan, sqrt, lambdify, pi, simplify
 from sympy.matrices import Matrix
-from sympy.abc import xi, zeta, phi, theta, psi, omega
+from sympy.abc import xi, zeta, phi, theta, psi, p, A, B, C
 
 #%%
-A = Matrix((
-    (1/xi**2, 0, 0),
+M = Matrix((
+    (1, 0, 0),
     (0, 1/zeta**2, 0),
-    (0, 0, 1)
-))
-
-P = Matrix((
-    (cos(psi), -sin(psi), 0),
-    (sin(psi), cos(psi), 0),
-    (0, 0, 1)
+    (0, 0, 1/xi**2)
 ))
 
 R = Matrix((
@@ -22,18 +16,14 @@ R = Matrix((
     (0, sin(theta), cos(theta))
 ))
 
-A_prime = R.T * A * R
-J = A_prime[0:2, 0:2]
-L_prime = A_prime[0:2, 2]
-L = A_prime[2, 0:2]
-K = A_prime[2, 2]
+M_prime = R.T * M * R
+J = M_prime[0:2, 0:2]
+L_prime = M_prime[0:2, 2]
+L = M_prime[2, 0:2]
+K = M_prime[2, 2]
 E = J - L_prime * 1/K * L
 
 #%%
-A = Symbol("A")
-B = Symbol("B")
-C = Symbol("C")
-
 Q = Matrix((
     (A, B/2),
     (B/2, C)
@@ -58,9 +48,19 @@ E_eigenvects = (
 )
 
 #%%
-q_expression = sqrt(E_eigenvalues[0] / E_eigenvalues[1])
-get_q = lambdify((xi, zeta, theta, phi), q_expression)
+q = sqrt(E_eigenvalues[0] / E_eigenvalues[1])
+get_q = lambdify((xi, zeta, theta, phi), q)
 
 #%%
-omega_expression = atan(E_eigenvects[1][1] / E_eigenvects[1][0])
-get_omega = lambdify((xi, zeta, theta, phi), omega_expression)
+psi = atan(E_eigenvects[0][1] / E_eigenvects[0][0])
+get_psi = lambdify((xi, zeta, theta, phi), psi)
+
+#%%
+P = Matrix((
+    (cos(p - psi), -sin(p - psi), 0),
+    (sin(p - psi), cos(p - psi), 0),
+    (0, 0, 1)
+))
+
+z_prime_vec = P.T * R.T * Matrix(3, 1, (0, 0, 1))
+get_z_prime_vec = lambdify((xi, zeta, theta, phi, p), z_prime_vec)

@@ -22,15 +22,25 @@ sern_bins = np.linspace(0, max_sern, 51)
 dum_bins = np.linspace(0, 1, 101)
 
 #%%
-if sys.argv[3] == "global":
-    approximator = SampleApproximator(pd.read_csv("data/raw/data_gama_gal_orient.txt", r"\s+"))
-elif sys.argv[3] == "global1d":
+method = sys.argv[2]
+
+if method == "global":
+    method += "_" + sys.argv[3]
+    approximator = SampleApproximator(
+        pd.read_csv("data/raw/data_gama_gal_orient.txt", r"\s+"),
+        float(sys.argv[3])
+    )
+elif method == "global1d":
     approximator = SampleApproximator1d(pd.read_csv("data/raw/data_gama_gal_orient.txt", r"\s+"))
-elif sys.argv[3] == "classifier":
-    approximator = ClassifierApproximator(pd.read_csv("data/intermediate/train_galaxies.csv"))
-elif sys.argv[3] == "classifier1d":
+elif method == "classifier":
+    method += "_" + sys.argv[3]
+    approximator = ClassifierApproximator(
+        pd.read_csv("data/intermediate/train_galaxies.csv"),
+        float(sys.argv[3])
+    )
+elif method == "classifier1d":
     approximator = ClassifierApproximator1d(pd.read_csv("data/intermediate/train_galaxies.csv"))
-elif sys.argv[3] == "random":
+elif method == "random":
     approximator = RandomApproximator()
 
 #%%
@@ -60,7 +70,7 @@ def process_galaxies(galaxies):
 
 #%%
 if __name__ == "__main__":
-    galaxies = pd.read_csv("data/intermediate/%s.csv" % sys.argv[2])
+    galaxies = pd.read_csv("data/intermediate/filament_galaxies.csv")
     #galaxies = galaxies[:4]
 
     pool = Pool(processes)
@@ -79,5 +89,5 @@ if __name__ == "__main__":
     #})
     results = pd.DataFrame(hist)
 
-    results.to_csv("data/final/%s_%s.csv" % (sys.argv[2], sys.argv[3]), index=False)
+    results.to_csv("data/final/%s.csv" % method, index=False)
     #results.to_csv("data/final/test.csv", index=False)

@@ -41,8 +41,8 @@ TP_GRID = np.column_stack((
 ))
 
 POS_INC_MESH = np.meshgrid(
-    np.linspace(-np.pi/2, np.pi/2, 100),
-    np.linspace(0, 1, 100)
+    np.linspace(0, np.pi/2, 100),
+    np.linspace(0, 1, 100),
 )
 POS_INC_GRID = np.column_stack((
     POS_INC_MESH[0].reshape(-1, 1),
@@ -60,14 +60,14 @@ def get_pdf(kde, grid, resample=False, N=10000):
     return kde(grid.T).reshape(100, 100)
 
 
-def plot_ba_results(ba, size=150000):
-    q, x, z, p, t = ba.sample(size)
+def plot_ba_2d_results(ba, size=150000):
+    q, xi, zeta, theta, phi = ba.sample(size)
     
     plt.xlim((0, 1))
     plt.plot(ba.q_pdf.x, ba.q_pdf.y, label="target")
     plt.hist(q, 100, (0, 1), True, label=r"$q$", histtype="step")
-    plt.hist(np.cos(t), 100, (0, 1), True, label=r"$\cos(\theta)$", histtype="step")
-    plt.hist(p/np.pi, 100, (0, 1), True, label=r"$\phi/\pi$", histtype="step")
+    plt.hist(np.cos(theta), 100, (0, 1), True, label=r"$\cos(\theta)$", histtype="step")
+    plt.hist(phi/np.pi, 100, (0, 1), True, label=r"$\phi/\pi$", histtype="step")
     plt.gca().legend()
 
 
@@ -102,22 +102,6 @@ def plot_xz_kde(ba, resample=True, **kwargs):
     plot_kde(ba.xz_kde, XZ_GRID, resample, aspect=1/2, **kwargs)
 
 
-def plot_qt_kde(ba, resample=True, **kwargs):
-    plt.xlabel(r"$q$")
-    plt.xticks(
-        [0, 19, 39, 59, 79, 99],
-        ["0.0", "0.2", "0.4", "0.6", "0.8", "1.0"]
-    )
-
-    plt.ylabel(r"$\theta$", rotation=0)
-    plt.yticks(
-        [0, 19, 39, 59, 79, 99],
-        [(r"$%d^∘$" % t) for t in np.linspace(-90, 90, 6)]
-    )
-
-    plot_kde(ba.qt_kde, QT_GRID, resample, aspect=1, **kwargs)
-
-
 def plot_qi_kde(ba, resample=True, **kwargs):
     plt.xlabel(r"$q$")
     plt.xticks(
@@ -132,22 +116,6 @@ def plot_qi_kde(ba, resample=True, **kwargs):
     )
 
     plot_kde(ba.qi_kde, QI_GRID, resample, aspect=1, **kwargs)
-
-
-def plot_qp_kde(ba, resample=True, **kwargs):
-    plt.xlabel(r"$q$")
-    plt.xticks(
-        [0, 19, 39, 59, 79, 99],
-        ["0.0", "0.2", "0.4", "0.6", "0.8", "1.0"]
-    )
-
-    plt.ylabel(r"$\phi$", rotation=0)
-    plt.yticks(
-        [0, 19, 39, 59, 79, 99],
-        [(r"$%d^∘$" % t) for t in np.linspace(-90, 90, 6)]
-    )
-
-    plot_kde(ba.qp_kde, QP_GRID, resample, aspect=1, **kwargs)
 
 
 def plot_tp_kde(ba, q, **kwargs):
@@ -171,24 +139,69 @@ def plot_tp_kde(ba, q, **kwargs):
 
     plot_kde(kde, TP_GRID, False, **kwargs)
 
-
-def plot_pos_inc_kde(ba, proj_q, proj_pos, **kwargs):
-    pos, inc = ba.sample_pos_inc(proj_q, proj_pos, 10000)
-
-    kde = stats.kde.gaussian_kde(
-        np.column_stack((pos, inc)).T, "scott"
+def plot_q_theta_kde(ba, **kwargs):
+    plt.xlabel(r"$q$")
+    plt.xticks(
+        [0, 19, 39, 59, 79, 99],
+        ["0.0", "0.2", "0.4", "0.6", "0.8", "1.0"]
     )
 
-    plt.xlabel("pos")
-    plt.xticks(
+    plt.ylabel(r"$\theta$", rotation=0)
+    plt.yticks(
         [0, 19, 39, 59, 79, 99],
         [(r"$%d^∘$" % t) for t in np.linspace(-90, 90, 6)]
     )
 
-    plt.ylabel("inc", rotation=0)
+    q, xi, zeta, theta, phi = ba.sample(10000)
+    kde = stats.kde.gaussian_kde(
+        np.column_stack((q, theta)).T
+    )
+
+    plot_kde(kde, QT_GRID, False, aspect=1, **kwargs)
+
+
+def plot_q_phi_kde(ba, **kwargs):
+    plt.xlabel(r"$q$")
+    plt.xticks(
+        [0, 19, 39, 59, 79, 99],
+        ["0.0", "0.2", "0.4", "0.6", "0.8", "1.0"]
+    )
+
+    plt.ylabel(r"$\phi$", rotation=0)
     plt.yticks(
         [0, 19, 39, 59, 79, 99],
-        [(r"$%.2f$" % t) for t in np.linspace(0, 1, 6)]
+        [(r"$%d^∘$" % t) for t in np.linspace(-90, 90, 6)]
+    )
+
+    q, xi, zeta, theta, phi = ba.sample(10000)
+    kde = stats.kde.gaussian_kde(
+        np.column_stack((q, phi)).T
+    )
+
+    plot_kde(kde, QP_GRID, False, aspect=1, **kwargs)
+
+
+def plot_pos_inc_kde(ba, q, p, **kwargs):
+    plt.xlabel("p")
+    plt.xticks(
+        [0, 19, 39, 59, 79, 99],
+        [(r"$%d^∘$" % t) for t in np.linspace(0, 90, 6)]
+    )
+
+    plt.ylabel(r"$cos(i)$", rotation=0)
+    plt.yticks(
+        [0, 19, 39, 59, 79, 99],
+        ["0.0", "0.2", "0.4", "0.6", "0.8", "1.0"]
+    )
+
+    p, i = ba.sample_pos_inc(q, p, 10000)
+    #spin_vec = ba.sample_spin_vec(q, p, 10000)
+    kde = stats.kde.gaussian_kde(
+        np.column_stack((
+            p, i
+            #abs(np.arctan(spin_vec[:,1] / spin_vec[:,0])),
+            #spin_vec[:,2]
+        )).T
     )
 
     plot_kde(kde, POS_INC_GRID, False, **kwargs)

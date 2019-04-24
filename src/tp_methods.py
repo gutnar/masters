@@ -4,13 +4,14 @@ from lib import *
 
 
 class SampleApproximator:
-    def __init__(self, galaxies):
+    def __init__(self, galaxies, z_min=0):
         q_pdf = PDF.from_samples(
             np.linspace(0, 1, 100),
             galaxies["ba"].values
         )
 
-        self.ba = BayesianApproximation(q_pdf)
+        self.ba = BayesianApproximation2d(q_pdf)
+        self.ba.Z_MIN = z_min
         self.ba.run()
     
     def sample_pos_inc(self, galaxy, N):
@@ -39,14 +40,16 @@ class SampleApproximator1d:
 
 
 class ClassifierApproximator:
-    def __init__(self, galaxies, **kwargs):
+    def __init__(self, galaxies, z_min=0, **kwargs):
+        self.z_min = z_min
         self.classifier = Classifier(**kwargs)
         self.classifier.fit(galaxies)
 
     def sample_pos_inc(self, galaxy, N):
         q_pdf = self.classifier.predict_pdf(galaxy)
 
-        ba = BayesianApproximation(q_pdf)
+        ba = BayesianApproximation2d(q_pdf)
+        ba.Z_MIN = self.z_min
         ba.run()
 
         return ba.sample_pos_inc(
