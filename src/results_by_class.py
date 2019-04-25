@@ -8,14 +8,16 @@ from src.common import dum_bins, galaxy_classes
 #%%
 results = {
     "random": "data/final/random.csv",
-    "ba": "data/final/ba.csv",
-    #"global1d": "data/final/filament_galaxies_global1d.csv",
+    #"ba": "data/final/ba.csv",
     #"classifier1d": "data/final/filament_galaxies_classifier1d.csv",
-    #"global": "data/final/global_0.csv",
+    "global": "data/final/global.csv",
+    "global1d": "data/final/global1d.csv",
     #"classifier": "data/final/classifier_0.csv"
+    "kmeans1d": "data/final/kmeans1d.csv"
 }
 
 dum_values = (dum_bins[:-1] + dum_bins[1:]) / 2
+#galaxy_classes = galaxy_classes[:4]
 
 #%%
 for index, (method, filename) in enumerate(results.items()):
@@ -27,6 +29,7 @@ for index, (method, filename) in enumerate(results.items()):
 
     for c in range(len(galaxy_classes)):
         plt.figure(c)
+        plt.ylim((0.009, 0.012))
         plt.title(galaxy_classes[c]["label"])
         plt.plot(dum_values, h[c] / h[c].sum(), label=method)
 

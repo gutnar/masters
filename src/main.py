@@ -33,9 +33,9 @@ elif method == "random":
 elif method == "ba":
     approximator = BaApproximator()
 elif method == "kmeans":
-    approximator = BaApproximator()
+    approximator = KMeansApproximator()
 elif method == "kmeans1d":
-    approximator = BaApproximator()
+    approximator = KMeans1dApproximator()
 
 #%%
 def process_galaxies(galaxies):
