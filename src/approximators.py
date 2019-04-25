@@ -122,11 +122,13 @@ class KMeansApproximator:
         self.ready = [False] * n_clusters
     
     def sample_pos_inc(self, galaxy, N):
-        if not self.ready[galaxy["g_class"]]:
-            self.ba[galaxy["g_class"]].run()
-            self.ready[galaxy["g_class"]] = True
+        g_class = int(galaxy["g_class"])
+
+        if not self.ready[g_class]:
+            self.ba[g_class].run()
+            self.ready[g_class] = True
         
-        return self.ba[galaxy["g_class"]].sample_pos_inc(
+        return self.ba[g_class].sample_pos_inc(
             galaxy["ba"],
             galaxy["pos"]/180*np.pi,
             N
@@ -147,11 +149,13 @@ class KMeans1dApproximator:
         self.ready = [False] * n_clusters
     
     def sample_pos_inc(self, galaxy, N):
-        if not self.ready[galaxy["g_class"]]:
-            self.ba[galaxy["g_class"]].run()
-            self.ready[galaxy["g_class"]] = True
+        g_class = int(galaxy["g_class"])
+
+        if not self.ready[g_class]:
+            self.ba[g_class].run()
+            self.ready[g_class] = True
 
         return (
             np.repeat(galaxy["pos"]/180*np.pi, N),
-            self.ba[galaxy["g_class"]].get_i_pdf(galaxy["ba"]).sample(N)
+            self.ba[g_class].get_i_pdf(galaxy["ba"]).sample(N)
         )
