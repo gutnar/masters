@@ -1,4 +1,3 @@
-from lib.bayesian_approximation import BayesianApproximation
 from lib.bayesian_approximation_1d import BayesianApproximation1d
 from lib.bayesian_approximation_2d import BayesianApproximation2d
 from lib.classifier import Classifier

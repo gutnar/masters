@@ -4,7 +4,7 @@ import scipy.stats as stats
 
 
 XZ_MESH = np.meshgrid(
-    np.linspace(0, 1, 100), np.linspace(0.5, 1, 100)
+    np.linspace(0, 1, 100), np.linspace(0, 1, 100)
 )
 XZ_GRID = np.append(
     XZ_MESH[0].reshape(-1, 1), XZ_MESH[1].reshape(-1, 1), 1

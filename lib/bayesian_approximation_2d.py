@@ -67,25 +67,10 @@ class BayesianApproximation2d:
         for method in methods:
             self.generate_posterior_xz_kde(*method)
     
-    '''
     @classmethod
-    def sample_spin_vec(self, q, p, N):
+    def sample_pos_inc(self, q, p, N, bw=0.005):
         q_sample, xi, zeta, theta, phi = self.sample(1000000)
-        sample = (q_sample > (q - 0.01)) & (q_sample < (q + 0.01))
-
-        kde = stats.kde.gaussian_kde(np.column_stack((
-            xi[sample], zeta[sample], theta[sample], phi[sample]
-        )).T)
-
-        xi, zeta, theta, phi = kde.resample(N)
-
-        return get_z_prime_vec(xi, zeta, theta, phi, p).T[:,0,:]
-    '''
-    
-    @classmethod
-    def sample_pos_inc(self, q, p, N):
-        q_sample, xi, zeta, theta, phi = self.sample(1000000)
-        sample = (q_sample > (q - 0.01)) & (q_sample < (q + 0.01))
+        sample = (q_sample > (q - bw)) & (q_sample < (q + bw))
         
         kde = stats.kde.gaussian_kde(np.column_stack((
             xi[sample], zeta[sample], theta[sample], phi[sample]

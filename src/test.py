@@ -3,125 +3,78 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-import lib
-import analytical
-
 #%%
-spiral = pd.read_csv("data/intermediate/spiral.csv")
-elliptic = pd.read_csv("data/intermediate/elliptic.csv")
-
-plt.hist(spiral["ba"], 100, (0, 1), True, histtype="step")
-plt.hist(elliptic["ba"], 100, (0, 1), True, histtype="step")
-
-#%%
-plt.hist(np.concatenate(lib.get_dum(
-    spiral["ra"],
-    spiral["dec"],
-    np.random.uniform(-np.pi/2, np.pi/2, len(spiral)),
-    #spiral["pos"] / 180 * np.pi,
-    np.arccos(spiral["ba"]),
-    spiral["gama"],
-    spiral["ex"],
-    spiral["ey"],
-    spiral["ez"]
-)), 100, density=True, histtype="step")
-
-plt.hist(np.concatenate(lib.get_dum(
-    elliptic["ra"],
-    elliptic["dec"],
-    np.random.uniform(-np.pi/2, np.pi/2, len(elliptic)),
-    #elliptic["pos"] / 180 * np.pi,
-    np.arccos(elliptic["ba"]),
-    elliptic["gama"],
-    elliptic["ex"],
-    elliptic["ey"],
-    elliptic["ez"]
-)), 100, density=True, histtype="step")
-
-#%%
-galaxies = pd.concat((spiral, elliptic))
-
-plt.hist(galaxies["sern"], 100, histtype="step")
+galaxies = pd.read_csv("data/raw/data_gama_gal_orient.txt", r"\s+")
 
 galaxies.describe()
 
-galaxies.to_csv("data/intermediate/filament_galaxies.csv", index=False)
-
 #%%
-elliptic.describe()
-
-#%%
-spiral.describe()
-
-#%%
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-
-import lib
-import analytical
-
-galaxies = pd.read_csv("data/intermediate/filament_galaxies.csv")
-galaxies = galaxies
-
-dum = []
-
-for i, galaxy in galaxies.iterrows():
-    dum1, dum2 = analytical.get_dum(
-        float(galaxy["ra"]),
-        float(galaxy["dec"]),
-        float(galaxy["pos"]),
-        (float(galaxy["ba"]), ),
-        int(galaxy["gama"]),
-        float(galaxy["ex"]),
-        float(galaxy["ey"]),
-        float(galaxy["ez"])
-    )
-
-    dum.append(dum1)
-    dum.append(dum2)
-
-plt.hist(dum, 100, density=True, histtype="step")
-
-plt.hist(np.concatenate(lib.get_dum(
-    galaxies["ra"],
-    galaxies["dec"],
-    galaxies["pos"] / 180 * np.pi,
+X = np.column_stack((
     galaxies["ba"],
-    galaxies["gama"],
-    galaxies["ex"],
-    galaxies["ey"],
-    galaxies["ez"]
-)), 100, density=True, histtype="step")
+    galaxies["sern"],
+    galaxies["redshift"],
+    galaxies["rmag"],
+    galaxies["rabsmag"],
+    galaxies["rad"]
+))
 
 #%%
-values = np.array([])
+from sklearn.cluster import KMeans
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+import numpy as np
+from sklearn import datasets
 
-for i in range(100):
-    dum1, dum2 = lib.get_dum(
-        galaxies["ra"],
-        galaxies["dec"],
-        np.random.uniform(0, np.pi),
-        np.arccos(np.random.uniform(0, 1)),
-        galaxies["gama"],
-        galaxies["ex"],
-        galaxies["ey"],
-        galaxies["ez"]
-    )
+#%% KMeans
+n_clusters = (2, 3, 4, 5, 6, 7, 8, 9, 10)
+inertia = []
 
-    values = np.concatenate((values, dum1, dum2))
+for n in n_clusters:
+    km = KMeans(n_clusters=n)
+    km.fit(X)
+    #km.predict(X)
+    #labels = km.labels_
+    inertia.append(km.inertia_)
 
-#plt.ylim((0.95, 1.05))
-plt.hist(values, 100, density=True, histtype="step")
+plt.plot(n_clusters, inertia)
 
 #%%
-import scipy.stats as stats
+n_clusters = 4
 
-kde = stats.kde.gaussian_kde(np.column_stack((
-    np.random.normal(0.2, 0.1, 1000000),
-    np.random.normal(0.85, 0.1, 1000000),
-    np.random.uniform(0, 1, 1000000),
-    np.random.uniform(0, 1, 1000000)
-)).T)
+km = KMeans(n_clusters=n_clusters)
+km.fit(X)
+km.predict(X)
 
-kde.resample(1000000).T
+labels = km.labels_
+
+#%% Plotting
+fig = plt.figure(1, figsize=(7,7))
+ax = Axes3D(fig, rect=[0, 0, 0.95, 1], elev=48, azim=134)
+ax.scatter(X[:, 3], X[:, 0], X[:, 2],
+          c=labels, edgecolor="k", s=50)
+ax.set_xlabel("Petal width")
+ax.set_ylabel("Sepal length")
+ax.set_zlabel("Petal length")
+plt.title("K Means", fontsize=14)
+
+#%%
+for i in range(n_clusters):
+    plt.figure(i)
+    plt.hist(galaxies[labels == i]["ba"], 100)
+
+#%%
+from lib import PDF, BayesianApproximation2d
+from lib.plotting import *
+
+for i in range(n_clusters):
+    ba = BayesianApproximation2d(PDF.from_samples(
+        np.linspace(0, 1, 100),
+        galaxies[labels == i]["ba"].values
+    ))
+    ba.run()
+
+    plt.figure(i*2)
+    plot_ba_2d_results(ba)
+
+    plt.figure(i*2 + 1)
+    plot_xz_kde(ba)

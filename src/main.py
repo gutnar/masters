@@ -10,43 +10,36 @@ import sys
 
 sys.path.append(os.getcwd())
 
-from lib import BayesianApproximation, PDF, get_dum
-from tp_methods import *
+from src.approximators import *
+from src.common import n_clusters, galaxy_classes, dum_bins
 
 #%%
 processes = int(sys.argv[1])
 samples_per_galaxy = 10000
 
-max_sern = 20
-sern_bins = np.linspace(0, max_sern, 51)
-dum_bins = np.linspace(0, 1, 101)
-
 #%%
 method = sys.argv[2]
 
 if method == "global":
-    method += "_" + sys.argv[3]
-    approximator = SampleApproximator(
-        pd.read_csv("data/raw/data_gama_gal_orient.txt", r"\s+"),
-        float(sys.argv[3])
-    )
+    approximator = GlobalApproximator()
 elif method == "global1d":
-    approximator = SampleApproximator1d(pd.read_csv("data/raw/data_gama_gal_orient.txt", r"\s+"))
-elif method == "classifier":
-    method += "_" + sys.argv[3]
-    approximator = ClassifierApproximator(
-        pd.read_csv("data/intermediate/train_galaxies.csv"),
-        float(sys.argv[3])
-    )
-elif method == "classifier1d":
-    approximator = ClassifierApproximator1d(pd.read_csv("data/intermediate/train_galaxies.csv"))
+    approximator = Global1dApproximator()
+elif method == "rf":
+    approximator = RandomForestApproximator()
+elif method == "rf1d":
+    approximator = RandomForest1dApproximator()
 elif method == "random":
     approximator = RandomApproximator()
+elif method == "ba":
+    approximator = BaApproximator()
+elif method == "kmeans":
+    approximator = BaApproximator()
+elif method == "kmeans1d":
+    approximator = BaApproximator()
 
 #%%
 def process_galaxies(galaxies):
-    hist = np.zeros((len(sern_bins) - 1, len(dum_bins) - 1))
-    #dum_hist = np.zeros(len(dum_bins) - 1)
+    hist = np.zeros((len(galaxy_classes), len(dum_bins) - 1))
     
     for i, galaxy in galaxies.iterrows():
         pos, inc = approximator.sample_pos_inc(galaxy, samples_per_galaxy)
@@ -62,15 +55,17 @@ def process_galaxies(galaxies):
             np.repeat(galaxy["ez"], samples_per_galaxy)
         ))
 
-        hist[int(galaxy["sern"]/(max_sern+0.000000000001)*(len(sern_bins) - 1))] += np.histogram(dum, dum_bins)[0]
+        dum_hist = np.histogram(dum, dum_bins)[0]
 
-        #dum_hist += np.histogram(dum, dum_bins)[0]
+        for c in range(len(galaxy_classes)):
+            if galaxy[galaxy_classes[c]["parameter"]] == galaxy_classes[c]["value"]:
+                hist[c] += dum_hist
 
     return hist
 
 #%%
 if __name__ == "__main__":
-    galaxies = pd.read_csv("data/intermediate/filament_galaxies.csv")
+    galaxies = pd.read_csv("data/intermediate/test_galaxies.csv")
     #galaxies = galaxies[:4]
 
     pool = Pool(processes)

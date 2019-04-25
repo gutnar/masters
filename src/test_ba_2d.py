@@ -32,4 +32,4 @@ plot_q_theta_kde(ba)
 plot_q_phi_kde(ba)
 
 #%%
-plot_pos_inc_kde(ba, 0.8, np.pi/4)
+plot_pos_inc_kde(ba, 0.9, np.pi/4)
