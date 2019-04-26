@@ -25,12 +25,11 @@ km = KMeans(n_clusters=n_clusters)
 km.fit(X)
 km.predict(X)
 
-#%% Sort labels by number of galaxies in cluster
+# Sort labels by number of galaxies in cluster
 N = [len(galaxies[km.labels_ == i]) for i in range(n_clusters)]
 label_order = np.flip(np.argsort(N))
 labels = np.array([label_order[label] for label in km.labels_])
 
-#%%
 for i in range(n_clusters):
     plt.figure(i)
     plt.hist(galaxies[labels == i]["ba"], 100)
