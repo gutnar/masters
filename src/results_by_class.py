@@ -19,7 +19,7 @@ results = {
 }
 
 dum_values = (dum_bins[:-1] + dum_bins[1:]) / 2
-galaxy_classes = galaxy_classes[:2]
+#galaxy_classes = galaxy_classes[:2]
 
 #%%
 for index, (method, filename) in enumerate(results.items()):
@@ -40,7 +40,7 @@ for index, (method, filename) in enumerate(results.items()):
     for c in range(len(galaxy_classes)):
         plt.figure(c)
         #plt.ylim((0.009, 0.012))
-        plt.title(galaxy_classes[c]["label"])
+        #plt.title(galaxy_classes[c]["label"])
         plt.plot(dum_values, h[c] / h[c].sum(), label=method)
 
     #plt.figure(len(sern_bins) + 1 + index)
@@ -50,3 +50,5 @@ for index, (method, filename) in enumerate(results.items()):
 for c in range(len(galaxy_classes)):
     plt.figure(c)
     plt.gca().legend()
+
+#plt.legend()

@@ -10,16 +10,14 @@ from lib.binney import get_q, get_psi
 
 
 class BayesianApproximation2d:
-    Z_MIN = 0
-
     @classmethod
     def __init__(self, q_pdf, size=10000, zeta_mu=0.85, zeta_sigma=0.1):
         self.q_pdf = q_pdf
 
         # Initialize xz kde
-        q = q_pdf.sample(size)
-        xi = np.random.uniform(0, q)
+        #q = q_pdf.sample(size)
         zeta = np.random.normal(zeta_mu, zeta_sigma, size)
+        xi = np.random.uniform(0, zeta)
 
         self.xz_kde = stats.kde.gaussian_kde(np.column_stack((xi, zeta)).T)
 
@@ -28,7 +26,7 @@ class BayesianApproximation2d:
         xi, zeta = self.xz_kde.resample(N)
 
         if validate:
-            valid = (xi > 0) & (xi < zeta) & (zeta > self.Z_MIN) & (zeta < 1)
+            valid = (xi > 0) & (xi < zeta) & (zeta < 1)
             xi = xi[valid]
             zeta = zeta[valid]
             N = len(xi)

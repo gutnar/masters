@@ -36,6 +36,14 @@ elif method == "kmeans":
     approximator = KMeansApproximator()
 elif method == "kmeans1d":
     approximator = KMeans1dApproximator()
+elif method == "kmeans_scott":
+    approximator = KMeansApproximator([(150000, "scott")]*50)
+elif method == "rf_scott":
+    approximator = RandomForestApproximator([150000, "scott"]*50)
+elif method == "ryden":
+    approximator = RydenApproximator()
+elif method == "bosch_ven":
+    approximator = BoschVenApproximator()
 
 #%%
 def process_galaxies(galaxies):

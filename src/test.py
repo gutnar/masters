@@ -78,3 +78,9 @@ for i in range(n_clusters):
 
     plt.figure(i*2 + 1)
     plot_xz_kde(ba)
+
+#%%
+galaxies = pd.read_csv("data/intermediate/galaxies.csv")
+test_galaxies = pd.read_csv("data/intermediate/test_galaxies.csv")
+
+galaxies[~galaxies["id"].isin(test_galaxies["id"])].describe()

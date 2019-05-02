@@ -4,7 +4,7 @@ import scipy.stats as stats
 
 
 XZ_MESH = np.meshgrid(
-    np.linspace(0, 1, 100), np.linspace(0, 1, 100)
+    np.linspace(0, 1, 100), np.linspace(0.5, 1, 100)
 )
 XZ_GRID = np.append(
     XZ_MESH[0].reshape(-1, 1), XZ_MESH[1].reshape(-1, 1), 1
@@ -83,7 +83,7 @@ def plot_ba_1d_results(ba, size=150000):
 
 def plot_kde(kde, grid, resample=True, **kwargs):
     pdf = get_pdf(kde, grid, resample)
-    plt.imshow(pdf, "magma", origin="lower", **kwargs)
+    plt.imshow(pdf, "Greys", origin="lower", **kwargs)
 
 
 def plot_xz_kde(ba, resample=True, **kwargs):
@@ -96,7 +96,7 @@ def plot_xz_kde(ba, resample=True, **kwargs):
     plt.ylabel(r"$\zeta$", rotation=0)
     plt.yticks(
         [0, 19, 39, 59, 79, 99],
-        [("%.1f" % z) for z in np.linspace(ba.Z_MIN, 1, 6)]
+        [("%.1f" % z) for z in np.linspace(0.5, 1, 6)]
     )
 
     plot_kde(ba.xz_kde, XZ_GRID, resample, aspect=1/2, **kwargs)
