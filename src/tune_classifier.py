@@ -2,7 +2,7 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from lib import Classifier, PDF, BayesianApproximation
+from lib import Classifier, PDF, BayesianApproximation2d
 from lib.plotting import *
 from sklearn.model_selection import RandomizedSearchCV
 
@@ -58,10 +58,54 @@ plt.plot(s, p)
 
 p[2]
 
+#%%
+galaxies = pd.read_csv("data/intermediate/galaxies.csv")
+#np.random.seed(0b11011100000011011011000001110000)
+training_set = np.random.rand(len(galaxies)) < 0.75
+train_galaxies = galaxies[training_set]
+test_galaxies = galaxies[~training_set]
+
+len(train_galaxies), len(test_galaxies)
+
 #%% Manual fit
-classifier = Classifier()
+classifier = Classifier(25, n_estimators=6, max_depth=10, max_features=2, bootstrap=True, criterion="entropy")
 classifier.fit(train_galaxies)
 classifier.evaluate(train_galaxies), classifier.evaluate(test_galaxies)
+
+#%% Manual fit
+p1 = []
+p2 = []
+s = (10, 11, 13, 14, 15, 17, 20, 22, 25, 27, 30, 35, 40, 50, 60, 70, 80, 100)
+
+for slots in s:
+    classifier = Classifier(slots, n_estimators=6, max_depth=10, max_features=2, bootstrap=True, criterion="entropy")
+    classifier.fit(train_galaxies)
+    p1.append(classifier.evaluate(test_galaxies))
+
+    q_pdf = PDF.from_samples(np.linspace(0, 1, slots), train_galaxies["ba"])
+    q_slots = test_galaxies["ba"].multiply(slots).apply(np.ceil).astype(int) - 1
+    p2.append(np.sum(q_pdf.y[q_slots]) / slots / len(q_slots))
+
+#%%
+plt.plot(np.linspace(10, 100, 90), 1/np.array(np.linspace(10, 100, 90)), label="Ühtlase q jaotuse järgi")
+plt.plot(s, p2, label="Treeningandmete q jaotuse järgi")
+plt.plot(s, p1, label="Treenitud otsustusmetsa järgi")
+plt.legend()
+
+plt.savefig("plots/global_vs_classifier.pdf")
+
+#%%
+p1[8] - p2[8]
+
+#%%
+classifier.clf.feature_importances_
+
+#%%
+for i in (10, 80, 190):
+    predicted_pdf = classifier.predict_pdf(test_galaxies.iloc[[i]])
+    plt.plot(predicted_pdf.x, predicted_pdf.y)
+
+plt.savefig("plots/random_predicted_pdf.pdf")
 
 #%% Parameter distribution for random search
 param_distributions = {
@@ -92,9 +136,6 @@ print(rs_classifier.clf)
 print(rs_classifier.evaluate(train_galaxies), rs_classifier.evaluate(test_galaxies))
 
 #%%
-plt.plot(rs_classifier.predict_pdf(test_galaxies.iloc[[120]]).y)
-
-#%%
 test_parameter("n_estimators", [8, 9, 10, 11, 12, 13, 14, 15, 16], {
     "max_depth": 11,
     "max_features": 4,
@@ -119,30 +160,3 @@ plt.plot(train_scores)
 
 plt.figure(2)
 plt.plot(test_scores)
-
-#%%
-ba = BayesianApproximation(rs_classifier.predict_pdf(test_galaxies.iloc[[1290]]))
-ba.run([(150000, 0.05)]*25)
-
-#%%
-plot_ba_results(ba)
-
-#%%
-plot_xz_kde(ba)
-
-#%%
-plot_qt_kde(ba)
-
-#%%
-plot_qp_kde(ba)
-
-#%%
-t_pdf = ba.get_t_pdf(0.8)
-plt.plot(t_pdf.x, t_pdf.y, label=r"$\theta$")
-plt.legend()
-
-#%%
-p_pdf = ba.get_p_pdf(0.8)
-plt.plot(p_pdf.x, p_pdf.y, label=r"$\phi$")
-plt.hist(p_pdf.sample(10000), 100, (-np.pi/2, np.pi/2), True)
-plt.legend()

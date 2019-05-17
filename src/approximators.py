@@ -73,10 +73,9 @@ class Global1dApproximator:
 
 class RandomForestApproximator:
     def __init__(self, methods=[(150000, 0.05)]*50, **kwargs):
-        galaxies = pd.read_csv("data/intermediate/galaxies.csv")
+        train_galaxies = pd.read_csv("data/intermediate/train_galaxies.csv")
         test_galaxies = pd.read_csv("data/intermediate/test_galaxies.csv")
-        train_galaxies = galaxies[~galaxies["id"].isin(test_galaxies["id"])]
-
+        
         self.classifier = Classifier(**kwargs)
         self.classifier.fit(train_galaxies)
 

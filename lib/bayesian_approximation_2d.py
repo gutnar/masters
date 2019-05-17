@@ -11,7 +11,7 @@ from lib.binney import get_q, get_psi
 
 class BayesianApproximation2d:
     @classmethod
-    def __init__(self, q_pdf, size=10000, zeta_mu=0.85, zeta_sigma=0.1):
+    def __init__(self, q_pdf, size=150000, zeta_mu=0.85, zeta_sigma=0.1):
         self.q_pdf = q_pdf
 
         # Initialize xz kde
@@ -61,7 +61,7 @@ class BayesianApproximation2d:
         self.xz_kde = stats.kde.gaussian_kde(xz_posterior.T, bw_method)
 
     @classmethod
-    def run(self, methods=[(150000, 0.05)]*50):
+    def run(self, methods=[(150000, "scott")]*50):
         for method in methods:
             self.generate_posterior_xz_kde(*method)
     

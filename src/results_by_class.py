@@ -21,7 +21,7 @@ results = {
 }
 
 dum_values = (dum_bins[:-1] + dum_bins[1:]) / 2
-#galaxy_classes = galaxy_classes[:2]
+galaxy_classes = galaxy_classes[:2]
 
 #%%
 for index, (method, method_results) in enumerate(results.items()):

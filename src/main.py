@@ -73,7 +73,7 @@ def process_galaxies(galaxies):
 
 #%%
 if __name__ == "__main__":
-    galaxies = pd.read_csv("data/intermediate/test_galaxies.csv")
+    galaxies = pd.read_csv("data/intermediate/filament_galaxies.csv")
     #galaxies = galaxies[:4]
 
     pool = Pool(processes)

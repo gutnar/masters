@@ -15,12 +15,13 @@ class Classifier:
         min_samples_leaf=100,
         max_features=4,
         bootstrap=False,
-        parameters=["rmag", "rabsmag", "redshift", "rad", "sern"]):
+        parameters=["rmag", "rabsmag", "redshift", "rad", "sern"],
+        criterion="gini"):
         self.q_slot_multiplier = q_slot_multiplier
         self.parameters = parameters
 
         self.clf = RandomForestClassifier(
-            criterion="gini",
+            criterion=criterion,
             n_estimators=n_estimators,
             max_depth=max_depth,
             min_samples_split=min_samples_split,
