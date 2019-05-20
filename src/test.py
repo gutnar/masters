@@ -81,6 +81,6 @@ for i in range(n_clusters):
 
 #%%
 galaxies = pd.read_csv("data/intermediate/galaxies.csv")
-test_galaxies = pd.read_csv("data/intermediate/test_galaxies.csv")
+filament_galaxies = pd.read_csv("data/intermediate/filament_galaxies.csv")
 
-galaxies[~galaxies["id"].isin(test_galaxies["id"])].describe()
+filament_galaxies.describe()

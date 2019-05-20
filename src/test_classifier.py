@@ -2,9 +2,11 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from sklearn.model_selection import RandomizedSearchCV
+
 from lib import Classifier, PDF, BayesianApproximation2d
 from lib.plotting import *
-from sklearn.model_selection import RandomizedSearchCV
+from src.tex_plot import savefig
 
 
 def evaluate(estimator, X, y):
@@ -44,6 +46,9 @@ test_galaxies.to_csv("data/intermediate/test_galaxies.csv", index=False)
 
 len(train_galaxies), len(test_galaxies)
 
+#%%
+galaxies.describe()
+
 #%% Manual fit
 classifier = Classifier(25, n_estimators=6, max_depth=10, max_features=2, bootstrap=True, criterion="entropy")
 classifier.fit(train_galaxies)
@@ -55,21 +60,23 @@ p2 = []
 s = (10, 11, 13, 14, 15, 17, 20, 22, 25, 27, 30, 35, 40, 50, 60, 70, 80, 100)
 
 for slots in s:
-    classifier = Classifier(slots, n_estimators=6, max_depth=10, max_features=2, bootstrap=True, criterion="entropy")
-    classifier.fit(train_galaxies)
-    p1.append(classifier.evaluate(test_galaxies))
+    clf = Classifier(slots, n_estimators=6, max_depth=10, max_features=2, bootstrap=True, criterion="entropy")
+    clf.fit(train_galaxies)
+    p1.append(clf.evaluate(test_galaxies))
 
     q_pdf = PDF.from_samples(np.linspace(0, 1, slots), galaxies["ba"])
     q_slots = test_galaxies["ba"].multiply(slots).apply(np.ceil).astype(int) - 1
     p2.append(np.sum(q_pdf.y[q_slots]) / slots / len(q_slots))
 
 #%%
-plt.plot(np.linspace(10, 100, 90), 1/np.array(np.linspace(10, 100, 90)), label="Ühtlase q jaotuse järgi")
-plt.plot(s, p2, label="Kogu valimi q jaotuse järgi")
+plt.plot(np.linspace(10, 100, 90), 1/np.array(np.linspace(10, 100, 90)), label="Ühtlase $q$ jaotuse järgi")
+plt.plot(s, p2, label="Kogu valimi $q$ jaotuse järgi")
 plt.plot(s, p1, label="Treenitud otsustusmetsa järgi")
-plt.legend()
+plt.xlabel("$K$")
+plt.ylabel("$\\mathcal{L}$", rotation=0)
+plt.legend(frameon=False)
 
-plt.savefig("plots/global_vs_classifier.pdf")
+savefig("plots/global_vs_classifier.pdf")
 
 #%%
 p1[8] - p2[8]
@@ -87,21 +94,24 @@ def compare_hist(parameter, cuts):
         color = next(plt.gca()._get_lines.prop_cycler)['color']
 
         if i == 0:
-            label = "%s < %.2f" % (parameter, median)
+            label = "$\\mathrm{%s} < %.2f$" % (parameter, median)
         else:
-            label = "%s > %.2f" % (parameter, median)
+            label = "$\\mathrm{%s} > %.2f$" % (parameter, median)
         
-        plt.plot(np.linspace(0, 1, 25) + 1/50, hist, color=color, label=label)
+        plt.plot(np.linspace(0, 1, 25, endpoint=False) + 1/50, hist, color=color, label=label)
         predicted_pdf = np.sum(classifier.clf.predict_proba(
             test_galaxies[quantiles == i][classifier.parameters]
         ), 0) / len(test_galaxies[quantiles == i]) * 25
         
-        plt.plot(np.linspace(0, 1, 25) + 1/50, predicted_pdf, 'o', color=color)
+        plt.plot(np.linspace(0, 1, 25, endpoint=False) + 1/50, predicted_pdf, 'o', color=color)
         
         #plt.title(parameter)
         plt.gca().legend()
 
-        plt.savefig("plots/classifier_%s.pdf" % parameter)
+        savefig("plots/classifier_%s.pdf" % parameter)
+
+#%%
+plt.rcParams.update({ 'font.size': 25 })
 
 #%%
 compare_hist("sern", (0, 0.5, 1))
@@ -123,4 +133,4 @@ for i in (10, 80, 190):
     predicted_pdf = classifier.predict_pdf(test_galaxies.iloc[[i]])
     plt.plot(predicted_pdf.x, predicted_pdf.y)
 
-plt.savefig("plots/random_predicted_pdf.pdf")
+savefig("plots/random_predicted_pdf.pdf")

@@ -9,14 +9,15 @@ from lib.pdf import PDF
 class Classifier:
     def __init__(self,
         q_slot_multiplier=25,
-        n_estimators=11,
-        max_depth=11,
+        n_estimators=6,#11,
+        max_depth=10,#11,
         min_samples_split=600,
         min_samples_leaf=100,
-        max_features=4,
-        bootstrap=False,
+        max_features=2,#4,
+        bootstrap=True,#False,
         parameters=["rmag", "rabsmag", "redshift", "rad", "sern"],
-        criterion="gini"):
+        criterion="entropy"#"gini"
+    ):
         self.q_slot_multiplier = q_slot_multiplier
         self.parameters = parameters
 

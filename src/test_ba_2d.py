@@ -4,24 +4,11 @@ import matplotlib.pyplot as plt
 
 from lib import PDF, BayesianApproximation2d
 from lib.plotting import *
-
-#%%
-import matplotlib as mpl
-
-mpl.style.use("default")
-
-plt.rcParams['text.latex.preamble'] = [r"\usepackage{lmodern}"]
-
-plt.rcParams.update({
-    'text.usetex': True,
-    'font.size': 11,
-    'font.family': 'lmodern',
-    'text.latex.unicode': True,
-})
+from src.tex_plot import savefig
 
 #%%
 galaxies = pd.read_csv("data/intermediate/galaxies.csv")
-galaxies = galaxies[galaxies["g_class"] == 1]
+#galaxies = galaxies[galaxies["sern"] < 2]
 
 q_pdf = PDF.from_samples(
     np.linspace(0, 1, 100),
@@ -33,15 +20,15 @@ plt.plot(q_pdf.x, q_pdf.y)
 
 #%%
 ba = BayesianApproximation2d(q_pdf, 150000)
-ba.run([(150000, "scott")]*10)
+ba.run([(1000, "scott")]*100 + [(150000, "scott")]*25)
 
 plot_ba_2d_results(ba)
 
 #%%
-plot_xz_kde(ba, False)
+plot_xz_kde(ba)
 
 plt.tick_params(direction="in")
-plt.savefig("plots/xi_zeta_intial_kde.pdf", dpi=1000, bbox_inches='tight')#, pad_inches=0)
+#plt.savefig("plots/xi_zeta_intial_kde.pdf", dpi=1000, bbox_inches='tight')#, pad_inches=0)
 
 #%%
 plot_q_theta_kde(ba)
@@ -58,3 +45,17 @@ q, xi, zeta, theta, phi = ba.sample(10000)
 #%%
 plot_kde(ba.xz_kde, XZ_GRID)
 
+#%%
+import numpy as np
+mu, sigma = 60, 10 # mean and standard deviation
+s = np.random.normal(mu, sigma, 1000)
+
+ga = pd.DataFrame({'r':s})
+
+cm = ga['r'].cumsum()
+plt.hist(ga['r'], bins=100)
+plt.plot(cm.values,cm.index)
+#%%
+ga.loc[ga.idxmax()]
+
+#%%
