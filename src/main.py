@@ -15,9 +15,8 @@ from src.common import n_clusters, galaxy_classes, dum_bins
 
 #%%
 processes = int(sys.argv[1])
-samples_per_galaxy = 1000
+samples_per_galaxy = 500
 bootstrap_count = 100
-bootstrap_sample_size = 1000
 bootstrap_quantiles = (0.025, 0.5, 0.975)
 
 #%%
@@ -124,14 +123,14 @@ if __name__ == "__main__":
         dum_hists = np.zeros((bootstrap_count, len(dum_bins) - 1))
 
         for i in range(bootstrap_count):
-            dum_sample = np.random.choice(dum[c], bootstrap_sample_size)#len(dum[c]))
+            dum_sample = np.random.choice(dum[c], len(dum[c]))
             dum_hists[i,:] = np.histogram(dum_sample, dum_bins)[0]
         
         dum_low, dum_mean, dum_high = np.quantile(dum_hists, bootstrap_quantiles, axis=0)
 
-        results["%s_low" % galaxy_classes[c]["label"]] = dum_low / bootstrap_sample_size * (len(dum_bins) - 1)
-        results["%s_mean" % galaxy_classes[c]["label"]] = dum_mean / bootstrap_sample_size * (len(dum_bins) - 1)
-        results["%s_high" % galaxy_classes[c]["label"]] = dum_high / bootstrap_sample_size * (len(dum_bins) - 1)
+        results["%s_low" % galaxy_classes[c]["label"]] = dum_low / len(dum[c]) * (len(dum_bins) - 1)
+        results["%s_mean" % galaxy_classes[c]["label"]] = dum_mean / len(dum[c]) * (len(dum_bins) - 1)
+        results["%s_high" % galaxy_classes[c]["label"]] = dum_high / len(dum[c]) * (len(dum_bins) - 1)
     
     print(time() - start)
 

@@ -18,7 +18,7 @@ processes = int(sys.argv[1])
 samples_per_galaxy = 50000
 bootstrap_count = 100
 bootstrap_sample_size = 1000
-bootstrap_quantiles = (0.025, 0.5, 0.975)
+bootstrap_quantiles = (0.05, 0.5, 0.95)
 
 #%%
 method = sys.argv[2]
@@ -85,6 +85,7 @@ def process_galaxies(galaxies):
 #%%
 if __name__ == "__main__":
     galaxies = pd.read_csv("data/intermediate/filament_galaxies.csv")
+    galaxies = galaxies[:100]
 
     pool = Pool(processes)
     chunks = np.array_split(galaxies, processes)
@@ -106,6 +107,11 @@ if __name__ == "__main__":
 
         for process in range(processes):
             hist += list(hist_raw[process][c])
+        
+        print(np.array(hist))
+
+        if len(hist) == 0:
+            continue
 
         low, mean, high = np.quantile(np.array(hist), bootstrap_quantiles, axis=0)
         

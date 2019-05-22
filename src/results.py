@@ -7,20 +7,11 @@ from src.common import dum_bins, galaxy_classes
 from src.tex_plot import savefig
 
 #%%
-results = {
-    "random": ["data/final/random_quantiles.csv", 2, "Juhuslik"],
-    "pos": ["data/final/pos_quantiles.csv", 2, "Positsiooninurk ja f"],
-    #"spiral_pos": ["data/final/spiral_pos_quantiles.csv", 2, "Spiraalne f"],
-    #"elliptic_pos": ["data/final/spiral_pos_quantiles.csv", 2, "Elliptiline f"],
-    "global": ["data/final/global_quantiles.csv", 2, "Global"]
-}
-
-#%%
 def plot_result(method, c):
     table = pd.read_csv("data/final/%s_quantiles.csv" % method)
     galaxy_class = galaxy_classes[c]
 
-    #plt.ylim((0.75, 1.25))
+    plt.ylim((0.75, 1.25))
 
     plt.plot(
         table["dum_mean"],
@@ -35,8 +26,7 @@ def plot_result(method, c):
     )
 
 #%%
-plot_result("random", 0)
-#plot_result("random", 1)
+plot_result("pos", 0)
 
 #%% spiral results
 plot_result("random", 0)
@@ -44,8 +34,8 @@ plot_result("spiral_pos", 0)
 plot_result("global", 0)
 
 #%% elliptic results
-plot_result("random", 0)
-plot_result("elliptic_pos", 1)
+plot_result("random", 1)
+#plot_result("elliptic_pos", 1)
 plot_result("global", 1)
 
 #%% spiral
