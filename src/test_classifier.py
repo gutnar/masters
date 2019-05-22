@@ -47,20 +47,35 @@ test_galaxies.to_csv("data/intermediate/test_galaxies.csv", index=False)
 len(train_galaxies), len(test_galaxies)
 
 #%%
+galaxies = pd.read_csv("data/intermediate/galaxies.csv")
+train_galaxies = pd.read_csv("data/intermediate/train_galaxies.csv")
+test_galaxies = pd.read_csv("data/intermediate/test_galaxies.csv")
+
+len(train_galaxies), len(test_galaxies)
+
+#%%
 galaxies.describe()
 
 #%% Manual fit
-classifier = Classifier(25, n_estimators=6, max_depth=10, max_features=2, bootstrap=True, criterion="entropy")
+classifier = Classifier(30, n_estimators=100, max_depth=6, max_features=2, bootstrap=True, criterion="entropy",
+    min_samples_split=600, min_samples_leaf=100,
+    parameters=["rmag", "rabsmag", "redshift", "rad", "sern"])
 classifier.fit(train_galaxies)
 classifier.evaluate(train_galaxies), classifier.evaluate(test_galaxies)
 
-#%% Manual fit
+#%% Slots
 p1 = []
 p2 = []
 s = (10, 11, 13, 14, 15, 17, 20, 22, 25, 27, 30, 35, 40, 50, 60, 70, 80, 100)
 
 for slots in s:
-    clf = Classifier(slots, n_estimators=6, max_depth=10, max_features=2, bootstrap=True, criterion="entropy")
+    print(slots)
+
+    if slots < 40:
+        clf = Classifier(slots, n_estimators=100, max_depth=6, max_features=2, bootstrap=True, criterion="entropy")
+    else:
+        clf = Classifier(slots, n_estimators=10, max_depth=6, max_features=2, bootstrap=True, criterion="entropy")
+    
     clf.fit(train_galaxies)
     p1.append(clf.evaluate(test_galaxies))
 
@@ -79,7 +94,10 @@ plt.legend(frameon=False)
 savefig("plots/global_vs_classifier.pdf")
 
 #%%
-p1[8] - p2[8]
+plt.plot(s[1:], (np.array(p1[1:]) - np.array(p2[1:])) / (np.array(p1[:-1]) - np.array(p2[:-1])))
+
+#%%
+p1[10] - p2[10]
 
 #%%
 classifier.clf.feature_importances_
@@ -90,7 +108,7 @@ def compare_hist(parameter, cuts):
     median = np.median(test_galaxies[parameter])
 
     for i in range(len(cuts) - 1):
-        hist = np.histogram(test_galaxies[quantiles == i]["ba"].values, 25, (0, 1), density=True)[0]
+        hist = np.histogram(test_galaxies[quantiles == i]["ba"].values, classifier.q_slot_multiplier, (0, 1), density=True)[0]
         color = next(plt.gca()._get_lines.prop_cycler)['color']
 
         if i == 0:
@@ -98,20 +116,20 @@ def compare_hist(parameter, cuts):
         else:
             label = "$\\mathrm{%s} > %.2f$" % (parameter, median)
         
-        plt.plot(np.linspace(0, 1, 25, endpoint=False) + 1/50, hist, color=color, label=label)
+        plt.plot(np.linspace(0, 1, classifier.q_slot_multiplier, endpoint=False) + 1/2/classifier.q_slot_multiplier, hist, color=color, label=label)
         predicted_pdf = np.sum(classifier.clf.predict_proba(
             test_galaxies[quantiles == i][classifier.parameters]
-        ), 0) / len(test_galaxies[quantiles == i]) * 25
+        ), 0) / len(test_galaxies[quantiles == i]) * classifier.q_slot_multiplier
+        plt.plot(np.linspace(0, 1, classifier.q_slot_multiplier, endpoint=False) + 1/2/classifier.q_slot_multiplier, predicted_pdf, 'o', color=color)
         
-        plt.plot(np.linspace(0, 1, 25, endpoint=False) + 1/50, predicted_pdf, 'o', color=color)
-        
-        #plt.title(parameter)
-        plt.gca().legend()
+        plt.xlabel("$q$")
+        plt.ylabel("$\\rho(q)$", rotation=0, labelpad=22)
+        plt.gca().legend(frameon=False)
 
         savefig("plots/classifier_%s.pdf" % parameter)
 
 #%%
-plt.rcParams.update({ 'font.size': 25 })
+plt.rcParams.update({ 'font.size': 22 })
 
 #%%
 compare_hist("sern", (0, 0.5, 1))
@@ -129,8 +147,14 @@ compare_hist("rmag", (0, 0.5, 1))
 compare_hist("redshift", (0, 0.5, 1))
 
 #%%
-for i in (10, 80, 190):
-    predicted_pdf = classifier.predict_pdf(test_galaxies.iloc[[i]])
-    plt.plot(predicted_pdf.x, predicted_pdf.y)
+names = ["A", "B", "C"]
+
+for i, j in enumerate((10, 80, 190)):
+    predicted_pdf = classifier.predict_pdf(test_galaxies.iloc[[j]])
+    plt.plot(predicted_pdf.x, predicted_pdf.y, label="Galaktika %s" % names[i])
+
+plt.xlabel("$q$")
+plt.ylabel("$\\rho(q)$", rotation=0)
+plt.legend(frameon=False)
 
 savefig("plots/random_predicted_pdf.pdf")

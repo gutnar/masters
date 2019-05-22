@@ -8,9 +8,9 @@ from lib.pdf import PDF
 #%%
 class Classifier:
     def __init__(self,
-        q_slot_multiplier=25,
-        n_estimators=6,#11,
-        max_depth=10,#11,
+        q_slot_multiplier=30,
+        n_estimators=100,#11,
+        max_depth=6,#11,
         min_samples_split=600,
         min_samples_leaf=100,
         max_features=2,#4,
