@@ -48,4 +48,4 @@ class Classifier:
     
     def predict_pdf(self, galaxy):
         pdf = self.clf.predict_proba(galaxy[self.parameters].values.reshape(1, -1))[0] * self.q_slot_multiplier
-        return PDF(np.linspace(0, 1, self.q_slot_multiplier) + 1/self.q_slot_multiplier/2, pdf)
+        return PDF(np.linspace(0, 1, self.q_slot_multiplier, endpoint=False) + 1/self.q_slot_multiplier/2, pdf)

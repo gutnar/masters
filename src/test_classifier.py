@@ -149,7 +149,7 @@ compare_hist("redshift", (0, 0.5, 1))
 #%%
 names = ["A", "B", "C"]
 
-for i, j in enumerate((10, 80, 190)):
+for i, j in enumerate((10, 80, 1210)):
     predicted_pdf = classifier.predict_pdf(test_galaxies.iloc[[j]])
     plt.plot(predicted_pdf.x, predicted_pdf.y, label="Galaktika %s" % names[i])
 
