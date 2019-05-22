@@ -24,6 +24,14 @@ class BaApproximator:
         )
 
 
+class PosApproximator:
+    def sample_pos_inc(self, galaxy, N):
+        return (
+            np.repeat(galaxy["pos"]/180*np.pi, N),
+            np.random.uniform(0, 1, N)
+        )
+
+
 class GlobalApproximator:
     def __init__(self):
         galaxies = pd.read_csv("data/intermediate/galaxies.csv")

@@ -11,4 +11,4 @@ galaxy_classes = (
     #{ "label": "g_unknown2", "parameter": "g_class", "value": 3 }
 )
 
-dum_bins = np.linspace(0, 1, 101)
+dum_bins = np.linspace(0, 1, 51)

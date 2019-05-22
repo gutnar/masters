@@ -12,14 +12,16 @@ from src.tex_plot import savefig
 
 results = {
     "random": ["data/final/random.csv", 2, "Juhuslik"],
-    "ba": ["data/final/ba.csv", 10],
+    "ba": ["data/final/ba.csv", 10, "ba"],
     #"classifier1d": "data/final/filament_galaxies_classifier1d.csv",
-    "global": ["data/final/global.csv", 4],
+    "global": ["data/final/global.csv", 4, "Kogu valimi $q$ jaotuse järgi"],
     #"global0.05": ["data/final/global.0.05.csv", 2],
     #"global1d": ["data/final/global1d.csv", 10],
     #"kmeans1d": "data/final/kmeans1d.csv",
     #"kmeans": "data/final/kmeans.csv",
-    "rf": ["data/final/rf.csv", 4]
+    "rf": ["data/final/rf.csv", 4, "Otsustusmetsa järgi"],
+    "ryden": ["data/final/bosch_ven.csv", 4, "Ryden"],
+    #"bosch_ven": ["data/final/bosch_ven.csv", 4, "Bosch & Ven"]
 }
 
 dum_values = (dum_bins[:-1] + dum_bins[1:]) / 2
