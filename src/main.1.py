@@ -15,10 +15,10 @@ from src.common import n_clusters, galaxy_classes, dum_bins
 
 #%%
 processes = int(sys.argv[1])
-samples_per_galaxy = 50000
-bootstrap_count = 100
-bootstrap_sample_size = 1000
-bootstrap_quantiles = (0.05, 0.5, 0.95)
+samples_per_galaxy = 5000
+bootstrap_count = 1000
+bootstrap_quantiles = (0.025, 0.5, 0.975)
+dum_bins = np.linspace(0, 1, int(sys.argv[3]) + 1)
 
 #%%
 method = sys.argv[2]
@@ -85,7 +85,7 @@ def process_galaxies(galaxies):
 #%%
 if __name__ == "__main__":
     galaxies = pd.read_csv("data/intermediate/filament_galaxies.csv")
-    galaxies = galaxies[:100]
+    #galaxies = galaxies[:4]
 
     pool = Pool(processes)
     chunks = np.array_split(galaxies, processes)
@@ -108,17 +108,24 @@ if __name__ == "__main__":
         for process in range(processes):
             hist += list(hist_raw[process][c])
         
-        print(np.array(hist))
+        hist = np.array(hist)
+        print(hist.shape)
 
         if len(hist) == 0:
             continue
-
-        low, mean, high = np.quantile(np.array(hist), bootstrap_quantiles, axis=0)
         
-        results["%s_low" % galaxy_class["label"]] = low / samples_per_galaxy / 2 * (len(dum_bins) - 1)
-        results["%s_mean" % galaxy_class["label"]] = mean / samples_per_galaxy / 2 * (len(dum_bins) - 1)
-        results["%s_high" % galaxy_class["label"]] = high / samples_per_galaxy / 2 * (len(dum_bins) - 1)
+        hist_mean = []
+        hist_std = []
+
+        for i in range(len(dum_bins) - 1):
+            i_means = [np.mean(np.random.choice(hist[:,i], hist.shape[0])) for j in range(bootstrap_count)]
+
+            hist_mean.append(np.mean(i_means))
+            hist_std.append(np.std(i_means))
+        
+        results["%s_mean" % galaxy_class["label"]] = np.array(hist_mean) / samples_per_galaxy / 2 * (len(dum_bins) - 1)
+        results["%s_std" % galaxy_class["label"]] = np.array(hist_std) / samples_per_galaxy / 2 * (len(dum_bins) - 1)
 
     print(time() - start)
 
-    results.to_csv("data/final/%s_quantiles.csv" % method, index=False)
+    results.to_csv("data/final/%s_quantiles.1.csv" % method, index=False)

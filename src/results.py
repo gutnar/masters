@@ -7,15 +7,14 @@ from src.common import dum_bins, galaxy_classes
 from src.tex_plot import savefig
 
 #%%
-def plot_result(method, c):
+def plot_result(method, c, label=""):
     table = pd.read_csv("data/final/%s_quantiles.csv" % method)
     galaxy_class = galaxy_classes[c]
 
-    plt.ylim((0.75, 1.25))
-
     plt.plot(
         table["dum_mean"],
-        table["%s_mean" % galaxy_class["label"]]
+        table["%s_mean" % galaxy_class["label"]],
+        label=label
     )
 
     plt.fill_between(
@@ -25,20 +24,50 @@ def plot_result(method, c):
         alpha=.5
     )
 
+
+def plot_result_1(method, c, label=""):
+    table = pd.read_csv("data/final/%s_quantiles.1.csv" % method)
+    galaxy_class = galaxy_classes[c]
+
+    mean = table["%s_mean" % galaxy_class["label"]]
+    std = table["%s_std" % galaxy_class["label"]] * 1.96
+
+    plt.plot(table["dum_mean"], mean, label=label)
+    plt.fill_between(table["dum_mean"], mean - std, mean + std, alpha=.5)
+
 #%%
-plot_result("pos", 0)
+#plt.ylim((0.9, 1.1))
+plot_result_1("random", 0)
+plot_result_1("spiral_pos", 0)
+
+#%%
+#plt.ylim((0.9, 1.1))
+plot_result_1("random", 1)
+plot_result_1("elliptic_pos", 1)
 
 #%% spiral results
+plt.ylim((0.75, 1.25))
 plot_result("random", 0)
 plot_result("spiral_pos", 0)
-plot_result("global", 0)
 
 #%% elliptic results
+plt.ylim((0.75, 1.25))
 plot_result("random", 1)
-#plot_result("elliptic_pos", 1)
-plot_result("global", 1)
+plot_result("elliptic_pos", 1)
 
-#%% spiral
+#%% global spiral results
+plt.ylim((0.94, 1.06))
+plot_result("random", 0, "Juhuslikud nurgad")
+plot_result("global", 0, "Kogu valimi $q$ jaotuse järgi")
+plt.legend(frameon=False)
+savefig("plots/results_global_spiral.pdf")
+
+#%% global elliptic results
+plt.ylim((0.94, 1.06))
+plot_result("random", 1, "Juhuslikud nurgad")
+plot_result("global", 1, "Kogu valimi $q$ jaotuse järgi")
+plt.legend(frameon=False)
+savefig("plots/results_global_elliptic.pdf")
 
 #%%
 #for c in range(len(galaxy_classes)):

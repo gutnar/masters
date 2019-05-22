@@ -11,15 +11,17 @@ from lib.binney import get_q, get_psi
 
 class BayesianApproximation2d:
     @classmethod
-    def __init__(self, q_pdf, size=150000, zeta_mu=0.85, zeta_sigma=0.1):
+    def __init__(self, q_pdf, initial_kde=None):
         self.q_pdf = q_pdf
 
         # Initialize xz kde
-        #q = q_pdf.sample(size)
-        zeta = np.random.normal(zeta_mu, zeta_sigma, size)
-        xi = np.random.uniform(0, zeta)
+        if initial_kde == None:
+            zeta = np.random.normal(0.85, 0.1, 150000)
+            xi = np.random.uniform(0, zeta)
 
-        self.xz_kde = stats.kde.gaussian_kde(np.column_stack((xi, zeta)).T)
+            self.xz_kde = stats.kde.gaussian_kde(np.column_stack((xi, zeta)).T)
+        else:
+            self.xz_kde = initial_kde
 
     @classmethod
     def sample(self, N, validate=True):
@@ -39,6 +41,16 @@ class BayesianApproximation2d:
         q = get_q(xi, zeta, theta, phi)
 
         return q, xi, zeta, theta, phi
+    
+    @classmethod
+    def error(self, N):
+        q, xi, zeta, theta, phi = self.sample(N)
+
+        q_kde = sm.nonparametric.KDEUnivariate(q)
+        q_kde.fit(bw=0.03)
+        q_pdf = q_kde.evaluate(self.q_pdf.x)
+
+        return np.sum((q_pdf - self.q_pdf.y)**2)
     
     @classmethod
     def generate_posterior_xz_kde(self, N, bw_method):
