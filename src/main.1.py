@@ -15,7 +15,7 @@ from src.common import n_clusters, galaxy_classes, dum_bins
 
 #%%
 processes = int(sys.argv[1])
-samples_per_galaxy = 1000
+samples_per_galaxy = 50000
 bootstrap_count = 100
 bootstrap_sample_size = 1000
 bootstrap_quantiles = (0.025, 0.5, 0.975)
@@ -56,16 +56,15 @@ elif method == "bosch_ven":
 
 #%%
 def process_galaxies(galaxies):
-    #hist_low = np.zeros((len(galaxy_classes), len(dum_bins) - 1))
-    #hist_mean = np.zeros((len(galaxy_classes), len(dum_bins) - 1))
-    #hist_high = np.zeros((len(galaxy_classes), len(dum_bins) - 1))
-
-    dum = [[] for c in galaxy_classes]
+    j = [0, 0]
+    hists = [
+        np.zeros((sum(galaxies[c["parameter"]] == c["value"]), len(dum_bins) - 1)) for c in galaxy_classes
+    ]
     
     for i, galaxy in galaxies.iterrows():
         pos, inc = approximator.sample_pos_inc(galaxy, samples_per_galaxy)
 
-        galaxy_dum = list(np.concatenate(get_dum(
+        galaxy_hist = np.histogram(np.concatenate(get_dum(
             np.repeat(galaxy["ra"], samples_per_galaxy),
             np.repeat(galaxy["dec"], samples_per_galaxy),
             pos,
@@ -74,43 +73,25 @@ def process_galaxies(galaxies):
             np.repeat(galaxy["ex"], samples_per_galaxy),
             np.repeat(galaxy["ey"], samples_per_galaxy),
             np.repeat(galaxy["ez"], samples_per_galaxy)
-        )))
-
-        #dum_hists = np.zeros((bootstrap_count, len(dum_bins) - 1))
-
-        #for i in range(bootstrap_count):
-        #    dum_sample = np.random.choice(dum, samples_per_galaxy)
-        #    dum_hists[i,:] = np.histogram(dum_sample, dum_bins)[0]
-        
-        #dum_low, dum_mean, dum_high = np.quantile(dum_hists, bootstrap_quantiles, axis=0)
+        )), dum_bins)[0]
 
         for c in range(len(galaxy_classes)):
             if galaxy[galaxy_classes[c]["parameter"]] == galaxy_classes[c]["value"]:
-                dum[c] += galaxy_dum
-                #hist_low[c] += dum_low
-                #hist_mean[c] += dum_mean
-                #hist_high[c] += dum_high
+                hists[c][j[c],:] = galaxy_hist
+                j[c] += 1
 
-    return dum#hist_low, hist_mean, hist_high
+    return hists
 
 #%%
 if __name__ == "__main__":
     galaxies = pd.read_csv("data/intermediate/filament_galaxies.csv")
-    #galaxies = galaxies[:4]
 
     pool = Pool(processes)
     chunks = np.array_split(galaxies, processes)
 
     start = time()
-    dum = [sum(d, []) for d in np.array(pool.map(process_galaxies, chunks)).T]
+    hist_raw = pool.map(process_galaxies, chunks)
     print(time() - start)
-
-    #results = pd.DataFrame({
-    #    "min": hist_bins[:-1],
-    #    "max": hist_bins[1:],
-    #    "N": dum_hist
-    #})
-    #results = pd.DataFrame(mean)
 
     results = pd.DataFrame({
         "dum_min": dum_bins[:-1],
@@ -120,20 +101,18 @@ if __name__ == "__main__":
 
     start = time()
 
-    for c in range(len(galaxy_classes)):
-        dum_hists = np.zeros((bootstrap_count, len(dum_bins) - 1))
+    for c, galaxy_class in enumerate(galaxy_classes):
+        hist = []
 
-        for i in range(bootstrap_count):
-            dum_sample = np.random.choice(dum[c], bootstrap_sample_size)#len(dum[c]))
-            dum_hists[i,:] = np.histogram(dum_sample, dum_bins)[0]
+        for process in range(processes):
+            hist += list(hist_raw[process][c])
+
+        low, mean, high = np.quantile(np.array(hist), bootstrap_quantiles, axis=0)
         
-        dum_low, dum_mean, dum_high = np.quantile(dum_hists, bootstrap_quantiles, axis=0)
+        results["%s_low" % galaxy_class["label"]] = low / samples_per_galaxy / 2 * (len(dum_bins) - 1)
+        results["%s_mean" % galaxy_class["label"]] = mean / samples_per_galaxy / 2 * (len(dum_bins) - 1)
+        results["%s_high" % galaxy_class["label"]] = high / samples_per_galaxy / 2 * (len(dum_bins) - 1)
 
-        results["%s_low" % galaxy_classes[c]["label"]] = dum_low / bootstrap_sample_size * (len(dum_bins) - 1)
-        results["%s_mean" % galaxy_classes[c]["label"]] = dum_mean / bootstrap_sample_size * (len(dum_bins) - 1)
-        results["%s_high" % galaxy_classes[c]["label"]] = dum_high / bootstrap_sample_size * (len(dum_bins) - 1)
-    
     print(time() - start)
 
     results.to_csv("data/final/%s_quantiles.csv" % method, index=False)
-    #results.to_csv("data/final/test.csv", index=False)

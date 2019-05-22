@@ -3,9 +3,14 @@ import pandas as pd
 import numpy as np
 import math
 import scipy.stats as stats
+from scipy.stats import truncnorm
 
 from lib import *
 from src.common import n_clusters
+
+
+def get_truncnorm_sample(mu, sigma, a, b, N):
+    return truncnorm.rvs((a - mu)/sigma, (b - mu)/sigma, loc=mu, scale=sigma, size=N)
 
 
 class RandomApproximator:
@@ -28,7 +33,27 @@ class PosApproximator:
     def sample_pos_inc(self, galaxy, N):
         return (
             np.repeat(galaxy["pos"]/180*np.pi, N),
-            np.random.uniform(0, 1, N)
+            np.random.uniform(0, galaxy["ba"], N)
+        )
+
+
+class SpiralPosApproximator:
+    def sample_pos_inc(self, galaxy, N):
+        f = get_truncnorm_sample(0.222, 0.057, 0, galaxy["ba"], N)
+
+        return (
+            np.repeat(galaxy["pos"]/180*np.pi, N),
+            np.sqrt((galaxy["ba"]**2 - f**2) / (1 - f**2))
+        )
+
+
+class EllipticPosApproximator:
+    def sample_pos_inc(self, galaxy, N):
+        f = get_truncnorm_sample(0.7, 0.1, 0, galaxy["ba"], N)
+
+        return (
+            np.repeat(galaxy["pos"]/180*np.pi, N),
+            np.sqrt((galaxy["ba"]**2 - f**2) / (1 - f**2))
         )
 
 
