@@ -24,12 +24,12 @@ train_galaxies = galaxies[~galaxies["id"].isin(test_galaxies["id"])]
 
 #%%
 X = np.column_stack((
-    train_galaxies["ba"],
-    train_galaxies["sern"],
-    train_galaxies["redshift"],
-    train_galaxies["rmag"],
-    train_galaxies["rabsmag"],
-    train_galaxies["rad"]
+    galaxies["ba"],
+    galaxies["sern"],
+    galaxies["redshift"],
+    galaxies["rmag"],
+    galaxies["rabsmag"],
+    galaxies["rad"]
 ))
 
 scaler = preprocessing.StandardScaler().fit(X)
@@ -44,7 +44,7 @@ X_test = np.column_stack((
     test_galaxies["rad"]
 ))
 
-scaler = preprocessing.StandardScaler().fit(X_test)
+#scaler = preprocessing.StandardScaler().fit(X_test)
 X_test_scaled = scaler.transform(X_test)
 
 #%%
@@ -63,7 +63,7 @@ p = []
 N = []
 
 for i in range(n_clusters):
-    cluster = train_galaxies[labels == i]
+    cluster = galaxies[labels == i]
     test_cluster = test_galaxies[test_labels == i]
 
     plt.hist(
@@ -120,8 +120,35 @@ for i in range(n_clusters):
     plot_xz_kde(ba)
 
 #%%
-galaxies["g_class"] = labels
-galaxies.to_csv("data/intermediate/galaxies.csv", index=False)
+filament_galaxies = pd.read_csv("data/intermediate/filament_galaxies.csv")
+
+
+
+filament_galaxies.describe()
+galaxies["g_class"].describe()
+
 
 #%%
-test_galaxies.to_csv("data/intermediate/test_galaxies.csv", index=False)
+galaxies[galaxies["id"].isin(filament_galaxies["id"])].describe()
+
+#%%
+galaxies["g_class"] = labels
+galaxies.to_csv("data/intermediate/galaxies.csv", index=False)
+filament_galaxies.to_csv("data/intermediate/filament_galaxies.csv", index=False)
+
+#%%
+test_galaxies["g_class"] = test_labels
+test_galaxies.to_csv("data/intermediate/filament_galaxies.csv", index=False)
+
+#%% TEST
+gals = pd.read_csv("data/intermediate/filament_galaxies.csv")
+
+p = []
+N = []
+
+for i in range(n_clusters):
+    cluster = gals[gals["g_class"] == i]
+    q_pdf = PDF.from_samples(np.linspace(0, 1, 100), cluster["ba"])
+    plt.plot(q_pdf.x, q_pdf.y)
+
+plt.legend()

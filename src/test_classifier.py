@@ -54,7 +54,8 @@ test_galaxies = pd.read_csv("data/intermediate/test_galaxies.csv")
 len(train_galaxies), len(test_galaxies)
 
 #%%
-galaxies.describe()
+filament_galaxies = pd.read_csv("data/intermediate/filament_galaxies.csv")
+filament_galaxies.describe()
 
 #%% Manual fit
 classifier = Classifier(30, n_estimators=100, max_depth=6, max_features=2, bootstrap=True, criterion="entropy",

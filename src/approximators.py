@@ -170,7 +170,7 @@ class RandomForest1dApproximator:
 
 
 class KMeansApproximator:
-    def __init__(self, methods=[(150000, 0.05)]*50):
+    def __init__(self):
         galaxies = pd.read_csv("data/intermediate/galaxies.csv")
 
         self.ba = [
@@ -181,13 +181,12 @@ class KMeansApproximator:
         ]
 
         self.ready = [False] * n_clusters
-        self.methods = methods
     
     def sample_pos_inc(self, galaxy, N):
         g_class = int(galaxy["g_class"])
 
         if not self.ready[g_class]:
-            self.ba[g_class].run(self.methods)
+            self.ba[g_class].run()
             self.ready[g_class] = True
         
         return self.ba[g_class].sample_pos_inc(

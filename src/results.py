@@ -21,16 +21,18 @@ def plot_result(method, c, label=""):
 
 #%% global spiral results
 plt.ylim((0.6, 1.4))
-plot_result("random", 0)
-plot_result("spiral_pos", 0)
-plot_result("sern", 0)
+plot_result("random", 0, "Juhuslikud nurgad")
+plot_result("spiral_pos", 0, "Ketta lähendus")
+plot_result("sern", 0, "Ellipsoidi lähendus")
+plt.legend(frameon=False)
 savefig("plots/results_spiral.pdf")
 
 #%% global elliptic results
 plt.ylim((0.6, 1.4))
-plot_result("random", 1)
-plot_result("elliptic_pos", 1)
-plot_result("sern", 1)
+plot_result("random", 1, "Juhuslikud nurgad")
+plot_result("elliptic_pos", 1, "Ketta lähendus")
+plot_result("sern", 1, "Ellipsoidi lähendus")
+plt.legend(frameon=False)
 savefig("plots/results_elliptic.pdf")
 
 #%% rf spiral results
