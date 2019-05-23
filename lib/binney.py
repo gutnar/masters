@@ -9,8 +9,8 @@ D = sqrt((A - C)**2 + B**2)
 
 #%%
 q = sqrt((A + C - D) / (A + C + D))
-get_q = lambdify([xi, zeta, phi, theta], q, "numpy")
+get_q = lambdify([xi, zeta, theta, phi], q, "numpy")
 
 #%%
 psi = 1/2*atan(B/(A - C))
-get_psi = lambdify([xi, zeta, phi, theta], psi, "numpy")
+get_psi = lambdify([xi, zeta, theta, phi], psi, "numpy")

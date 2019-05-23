@@ -46,13 +46,15 @@ plot_result_1("random", 1)
 plot_result_1("elliptic_pos", 1)
 
 #%% global spiral results
-plt.ylim((0.9, 1.1))
+plt.ylim((0.6, 1.4))
 plot_result_1("random", 0)
+plot_result_1("spiral_pos", 0)
 plot_result_1("global", 0)
 
 #%% global elliptic results
-plt.ylim((0.9, 1.1))
+plt.ylim((0.6, 1.4))
 plot_result_1("random", 1)
+plot_result_1("elliptic_pos", 1)
 plot_result_1("global", 1)
 
 #%% rf spiral results

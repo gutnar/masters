@@ -26,8 +26,7 @@ class BayesianApproximation2d:
     @classmethod
     def sample(self, N, validate=True):
         xi, zeta = self.xz_kde.resample(N)
-        xi[xi < 0] = -xi[xi < 0]
-
+        
         if validate:
             valid = (xi > 0) & (xi < zeta) & (zeta > 0.5) & (zeta < 1)
             xi = xi[valid]
