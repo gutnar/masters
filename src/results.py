@@ -15,7 +15,7 @@ def plot_result(method, c, label=""):
     std = table["%s_std" % galaxy_class["label"]] * 1.96
 
     plt.xlabel("$|\\vec{n} \cdot \\vec{\\omega}|$")
-    plt.ylabel("$\\rho(|\\vec{n} \cdot \\vec{\\omega}|)$", rotation=0)
+    plt.ylabel("$\\rho(|\\vec{n} \cdot \\vec{\\omega}|)$", rotation=0, labelpad=25)
     plt.plot(table["dum_mean"], mean, label=label)
     plt.fill_between(table["dum_mean"], mean - std, mean + std, alpha=.5)
 
@@ -23,14 +23,14 @@ def plot_result(method, c, label=""):
 plt.ylim((0.6, 1.4))
 plot_result("random", 0)
 plot_result("spiral_pos", 0)
-plot_result("global", 0)
+plot_result("sern", 0)
 savefig("plots/results_spiral.pdf")
 
 #%% global elliptic results
 plt.ylim((0.6, 1.4))
 plot_result("random", 1)
 plot_result("elliptic_pos", 1)
-plot_result("global", 1)
+plot_result("sern", 1)
 savefig("plots/results_elliptic.pdf")
 
 #%% rf spiral results

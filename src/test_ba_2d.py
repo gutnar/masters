@@ -52,20 +52,71 @@ plot_ba_2d_results2(elliptic_ba)
 #%%
 import statsmodels.api as sm
 
-def plot_ba_2d_results2(ba, size=150000):
+def plot_ba_2d_results2(ba, label, size=150000):
     q, xi, zeta, theta, phi = ba.sample(size)
     
     q_kde = sm.nonparametric.KDEUnivariate(q)
     q_kde.fit(bw=0.03)
     q_pdf = q_kde.evaluate(ba.q_pdf.x)
     
-    plt.xlim((0, 1))
-    plt.plot(ba.q_pdf.x, ba.q_pdf.y, "o", label="$\\rho(q)$")
-    plt.plot(ba.q_pdf.x, q_pdf, label="$\\rho(q)$")
-    
-    plt.legend()
+    color = next(plt.gca()._get_lines.prop_cycler)['color']
 
-plot_ba_2d_results2(spiral_ba)
+    plt.plot(ba.q_pdf.x, ba.q_pdf.y, "x", alpha=0.5, color=color)
+    plt.plot(ba.q_pdf.x, q_pdf, label=label, color=color)
+
+plt.xlabel("$q$")
+plt.ylabel("$\\rho(q)$", rotation=0, labelpad=15)
+plot_ba_2d_results2(spiral_ba, "Spiraalsed galaktikad")
+plot_ba_2d_results2(elliptic_ba, "Elliptilised galaktikad")
+plt.legend(frameon=False)
+
+savefig("plots/spiral_elliptic_fits.pdf")
+
+#%% cos(theta) distribution
+def plot_ba_2d_results3(ba, label, size=150000):
+    q, xi, zeta, theta, phi = ba.sample(size)
+
+    cos_theta = np.cos(theta)
+    cos_theta_kde = sm.nonparametric.KDEUnivariate(cos_theta)
+    cos_theta_kde.fit(bw=0.03)
+    cos_theta_pdf = cos_theta_kde.evaluate(np.linspace(-0.5, 0.5, 100)) * 2
+    
+    color = next(plt.gca()._get_lines.prop_cycler)['color']
+
+    plt.plot(np.linspace(0, 1, 100), cos_theta_pdf, color=color, label=label)
+
+
+plt.rcParams.update({ 'font.size': 22 })
+plt.ylim((0.9, 1.1))
+plt.xlabel("$\\cos\\theta$")
+plt.ylabel("$\\rho(\\cos\\theta)$", rotation=0, labelpad=35)
+plot_ba_2d_results3(spiral_ba, "Spiraalsed galaktikad")
+plot_ba_2d_results3(elliptic_ba, "Elliptilised galaktikad")
+plt.legend(frameon=False)
+
+savefig("plots/spiral_elliptic_rho_cos_theta.pdf")
+
+#%% phi distribution
+def plot_ba_2d_results4(ba, label, size=150000):
+    q, xi, zeta, theta, phi = ba.sample(size)
+
+    phi_kde = sm.nonparametric.KDEUnivariate(phi)
+    phi_kde.fit(bw=0.03)
+    phi_pdf = phi_kde.evaluate(np.linspace(-np.pi/2, np.pi/2, 100)) * 2 * np.pi
+    
+    color = next(plt.gca()._get_lines.prop_cycler)['color']
+
+    plt.plot(np.linspace(-np.pi/2, np.pi/2, 100), phi_pdf, color=color, label=label)
+
+plt.rcParams.update({ 'font.size': 22 })
+plt.ylim((0.9, 1.1))
+plt.xlabel("$\\phi$")
+plt.ylabel("$\\rho(\\phi)$", rotation=0, labelpad=35)
+plot_ba_2d_results4(spiral_ba, "Spiraalsed galaktikad")
+plot_ba_2d_results4(elliptic_ba, "Elliptilised galaktikad")
+plt.legend(frameon=False)
+
+savefig("plots/spiral_elliptic_rho_phi.pdf")
 
 #%%
 plot_xz_kde(spiral_ba, False)

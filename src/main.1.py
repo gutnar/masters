@@ -132,7 +132,7 @@ if __name__ == "__main__":
 
         for i in range(len(dum_bins) - 1):
             i_means = [
-                np.mean(np.random.choice(hist[:,i], hist.shape[0], p=weight))
+                np.mean(np.random.choice(hist[:,i], hist.shape[0]))
                 for j in range(bootstrap_count)
             ]
 
