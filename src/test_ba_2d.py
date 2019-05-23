@@ -13,33 +13,67 @@ def get_truncnorm_sample(mu, sigma, a, b, N):
 
 #%%
 galaxies = pd.read_csv("data/intermediate/galaxies.csv")
-train_galaxies = pd.read_csv("data/intermediate/train_galaxies.csv")
-test_galaxies = pd.read_csv("data/intermediate/test_galaxies.csv")
-#galaxies = galaxies[galaxies["sern"] < 2]
+#train_galaxies = pd.read_csv("data/intermediate/train_galaxies.csv")
+#test_galaxies = pd.read_csv("data/intermediate/test_galaxies.csv")
 
-q_pdf = PDF.from_samples(
+spiral = galaxies[galaxies["sern"] < 2]
+elliptic = galaxies[galaxies["sern"] > 2]
+
+spiral_pdf = PDF.from_samples(
     np.linspace(0, 1, 100),
-    galaxies["ba"].values
+    spiral["ba"]
 )
 
-plt.hist(galaxies["ba"].values, 100, (0, 1), density=True)
-plt.plot(q_pdf.x, q_pdf.y)
+elliptic_pdf = PDF.from_samples(
+    np.linspace(0, 1, 100),
+    elliptic["ba"]
+)
+
+#plt.hist(galaxies["ba"].values, 100, (0, 1), density=True)
+plt.plot(spiral_pdf.x, spiral_pdf.y)
+plt.plot(elliptic_pdf.x, elliptic_pdf.y)
 
 #%% Manual fit
-classifier = Classifier()
-classifier.fit(train_galaxies)
+#classifier = Classifier()
+#classifier.fit(train_galaxies)
 
 #%%
-ba = BayesianApproximation2d(q_pdf)
-ba.run()
+spiral_ba = BayesianApproximation2d(spiral_pdf)
+spiral_ba.run()
+
+plot_ba_2d_results2(spiral_ba)
 
 #%%
-plot_ba_2d_results(ba)
+elliptic_ba = BayesianApproximation2d(elliptic_pdf)
+elliptic_ba.run()
+
+plot_ba_2d_results2(elliptic_ba)
 
 #%%
-plot_xz_kde(ba)
-#plt.tick_params(direction="in")
-#plt.savefig("plots/xi_zeta_intial_kde.pdf", dpi=1000, bbox_inches='tight')#, pad_inches=0)
+import statsmodels.api as sm
+
+def plot_ba_2d_results2(ba, size=150000):
+    q, xi, zeta, theta, phi = ba.sample(size)
+    
+    q_kde = sm.nonparametric.KDEUnivariate(q)
+    q_kde.fit(bw=0.03)
+    q_pdf = q_kde.evaluate(ba.q_pdf.x)
+    
+    plt.xlim((0, 1))
+    plt.plot(ba.q_pdf.x, ba.q_pdf.y, "o", label="$\\rho(q)$")
+    plt.plot(ba.q_pdf.x, q_pdf, label="$\\rho(q)$")
+    
+    plt.legend()
+
+plot_ba_2d_results2(spiral_ba)
+
+#%%
+plot_xz_kde(spiral_ba, False)
+savefig("plots/xi_zeta_spiral.pdf")
+
+#%%
+plot_xz_kde(elliptic_ba, False)
+savefig("plots/xi_zeta_elliptic.pdf")
 
 #%%
 pos, inc = ba.sample_pos_inc(0.1, 0.5)
@@ -50,15 +84,16 @@ plt.hist(np.abs(inc), 100, (0, 1), label="inc", histtype="step")
 plt.legend()
 
 #%%
-q = 0.05
+q = 1
 bw = 0.005
 
 q_sample, xi, zeta, theta, phi = ba.sample(1000000)
 sample = (q_sample > (q - bw)) & (q_sample < (q + bw))
 
-plt.hist(xi[sample], 100, label="xi", histtype="step")
-plt.hist(zeta[sample], 100, label="zeta", histtype="step")
-plt.hist(np.abs(np.cos(theta[sample])), 100, label="theta", histtype="step")
+#plt.hist(xi[sample], 100, label="xi", histtype="step")
+#plt.hist(zeta[sample], 100, label="zeta", histtype="step")
+#plt.hist(np.abs(np.cos(theta[sample])), 100, label="theta", histtype="step")
+plt.hist(np.abs(phi[sample] / np.pi), 100, label="phi", histtype="step")
 
 plt.legend()
 
@@ -68,18 +103,6 @@ from lib.binney import get_q
 plt.hist(get_q(xi2, zeta2, theta2, phi2), 100, histtype="step", label="2")
 plt.hist(get_q(xi[sample], zeta[sample], theta[sample], phi[sample]), 100, histtype="step", label="1")
 plt.legend()
-
-#%%
-plt.hist(xi2[(np.abs(np.cos(theta2)) > 0.9) & (xi2 > 0.04)], 100, histtype="step", label="xi")
-plt.legend()
-
-#%%
-weird = (np.abs(np.cos(theta2)) > 0.95) & (xi2 > 0.0445)
-
-xi2[weird][0], zeta2[weird][0], theta2[weird][0], phi2[weird][0]
-
-#%%
-
 
 #%%
 plot_q_theta_kde(ba)

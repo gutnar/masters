@@ -116,11 +116,11 @@ def compare_hist(parameter, cuts):
         else:
             label = "$\\mathrm{%s} > %.2f$" % (parameter, median)
         
-        plt.plot(np.linspace(0, 1, classifier.q_slot_multiplier, endpoint=False) + 1/2/classifier.q_slot_multiplier, hist, color=color, label=label)
+        plt.plot(np.linspace(0, 1, classifier.q_slot_multiplier, endpoint=False) + 1/2/classifier.q_slot_multiplier, hist, 'o', color=color)
         predicted_pdf = np.sum(classifier.clf.predict_proba(
             test_galaxies[quantiles == i][classifier.parameters]
         ), 0) / len(test_galaxies[quantiles == i]) * classifier.q_slot_multiplier
-        plt.plot(np.linspace(0, 1, classifier.q_slot_multiplier, endpoint=False) + 1/2/classifier.q_slot_multiplier, predicted_pdf, 'o', color=color)
+        plt.plot(np.linspace(0, 1, classifier.q_slot_multiplier, endpoint=False) + 1/2/classifier.q_slot_multiplier, predicted_pdf, color=color, label=label)
         
         plt.xlabel("$q$")
         plt.ylabel("$\\rho(q)$", rotation=0, labelpad=22)

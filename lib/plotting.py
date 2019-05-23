@@ -4,7 +4,7 @@ import scipy.stats as stats
 
 
 XZ_MESH = np.meshgrid(
-    np.linspace(0, 1, 100), np.linspace(0, 1, 100)
+    np.linspace(0, 1, 100), np.linspace(0.5, 1, 100)
 )
 XZ_GRID = np.append(
     XZ_MESH[0].reshape(-1, 1), XZ_MESH[1].reshape(-1, 1), 1
@@ -95,8 +95,8 @@ def plot_xz_kde(ba, resample=True, **kwargs):
 
     plt.ylabel(r"$\zeta$", rotation=0)
     plt.yticks(
-        [0, 19, 39, 59, 79, 99],
-        ["0.0", "0.2", "0.4", "0.6", "0.8", "1.0"]
+        [0, 49, 99],
+        ["0.5", "0.75", "1.0"]
     )
 
     plot_kde(ba.xz_kde, XZ_GRID, resample, aspect=1/2, **kwargs)
