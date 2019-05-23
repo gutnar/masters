@@ -11,7 +11,7 @@ import sys
 sys.path.append(os.getcwd())
 
 from src.approximators import *
-from src.common import n_clusters, galaxy_classes, dum_bins
+from src.common import n_clusters, galaxy_classes
 
 #%%
 processes = int(sys.argv[1])

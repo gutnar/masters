@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from src.common import dum_bins, galaxy_classes
 from src.tex_plot import savefig
 
-#%%
+
 def plot_result(method, c, label=""):
     table = pd.read_csv("data/final/%s_quantiles.csv" % method)
     galaxy_class = galaxy_classes[c]

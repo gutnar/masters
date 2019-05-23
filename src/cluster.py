@@ -17,10 +17,8 @@ e_elliptic = pd.read_csv("data/raw/gama_elliptic.txt", r"\s+")
 e_spiral["e_class"] = 0
 e_elliptic["e_class"] = 1
 
-test_galaxies = pd.concat((e_spiral, e_elliptic))
-test_galaxies = pd.merge(test_galaxies, galaxies, on="id")
-
-train_galaxies = galaxies[~galaxies["id"].isin(test_galaxies["id"])]
+filament_galaxies = pd.concat((e_spiral, e_elliptic))
+filament_galaxies = pd.merge(filament_galaxies, galaxies, on="id")
 
 #%%
 X = np.column_stack((
@@ -35,23 +33,23 @@ X = np.column_stack((
 scaler = preprocessing.StandardScaler().fit(X)
 X_scaled = scaler.transform(X)
 
-X_test = np.column_stack((
-    test_galaxies["ba"],
-    test_galaxies["sern"],
-    test_galaxies["redshift"],
-    test_galaxies["rmag"],
-    test_galaxies["rabsmag"],
-    test_galaxies["rad"]
+X_filament = np.column_stack((
+    filament_galaxies["ba"],
+    filament_galaxies["sern"],
+    filament_galaxies["redshift"],
+    filament_galaxies["rmag"],
+    filament_galaxies["rabsmag"],
+    filament_galaxies["rad"]
 ))
 
 #scaler = preprocessing.StandardScaler().fit(X_test)
-X_test_scaled = scaler.transform(X_test)
+X_filament_scaled = scaler.transform(X_filament)
 
 #%%
 km = KMeans(n_clusters=n_clusters)
 km.fit(X_scaled)
 labels = km.predict(X_scaled)
-test_labels = km.predict(X_test_scaled)
+filament_labels = km.predict(X_filament_scaled)
 
 # Sort labels by number of galaxies in cluster
 # N = [len(galaxies[km.labels_ == i]) for i in range(n_clusters)]
@@ -64,7 +62,7 @@ N = []
 
 for i in range(n_clusters):
     cluster = galaxies[labels == i]
-    test_cluster = test_galaxies[test_labels == i]
+    filament_cluster = filament_galaxies[filament_labels == i]
 
     plt.hist(
         cluster["ba"], 100, (0, 1), True,
@@ -72,11 +70,11 @@ for i in range(n_clusters):
     )
 
     q_pdf = PDF.from_samples(np.linspace(0, 1, 100), cluster["ba"])
-    q_slots = test_cluster["ba"].multiply(100).apply(np.ceil).astype(int) - 1
+    q_slots = filament_cluster["ba"].multiply(100).apply(np.ceil).astype(int) - 1
     
-    if len(test_cluster):
-        p.append(np.sum(q_pdf.y[q_slots]) / len(test_cluster) / 100)
-        N.append(len(test_cluster))
+    if len(filament_cluster):
+        p.append(np.sum(q_pdf.y[q_slots]) / len(filament_cluster) / 100)
+        N.append(len(filament_cluster))
     else:
         p.append(0)
         N.append(0)
@@ -90,65 +88,21 @@ print(p, N)
 print((p * N).sum() / N.sum())
 
 #%%
-cluster = galaxies[labels == 1]
-
-ba = BayesianApproximation2d(PDF.from_samples(
-    np.linspace(0, 1, 100),
-    cluster["ba"].values
-))
-
-ba.run()
-
-plt.figure(1)
-plot_ba_2d_results(ba)
-
-plt.figure(2)
-plot_xz_kde(ba)
-
-#%%
-for i in range(n_clusters):
-    ba = BayesianApproximation2d(PDF.from_samples(
-        np.linspace(0, 1, 100),
-        galaxies[labels == i]["ba"].values
-    ))
-    ba.run()
-
-    plt.figure(i*2)
-    plot_ba_2d_results(ba)
-
-    plt.figure(i*2 + 1)
-    plot_xz_kde(ba)
-
-#%%
-filament_galaxies = pd.read_csv("data/intermediate/filament_galaxies.csv")
-
-
-
-filament_galaxies.describe()
-galaxies["g_class"].describe()
-
-
-#%%
-galaxies[galaxies["id"].isin(filament_galaxies["id"])].describe()
-
-#%%
 galaxies["g_class"] = labels
+filament_galaxies["g_class"] = filament_labels
+
 galaxies.to_csv("data/intermediate/galaxies.csv", index=False)
 filament_galaxies.to_csv("data/intermediate/filament_galaxies.csv", index=False)
 
-#%%
-test_galaxies["g_class"] = test_labels
-test_galaxies.to_csv("data/intermediate/filament_galaxies.csv", index=False)
-
 #%% TEST
-gals = pd.read_csv("data/intermediate/filament_galaxies.csv")
+test = pd.read_csv("data/intermediate/galaxies.csv")
 
 p = []
 N = []
 
 for i in range(n_clusters):
-    cluster = gals[gals["g_class"] == i]
-    q_pdf = PDF.from_samples(np.linspace(0, 1, 100), cluster["ba"])
+    cluster = test[test["g_class"] == i]
+    q_pdf = PDF.from_samples(np.linspace(0, 20, 100), cluster["sern"])
     plt.plot(q_pdf.x, q_pdf.y)
 
 plt.legend()
