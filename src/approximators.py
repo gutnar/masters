@@ -80,6 +80,29 @@ class GlobalApproximator:
         )
 
 
+class SernApproximator:
+    def __init__(self):
+        galaxies = pd.read_csv("data/intermediate/galaxies.csv")
+        spiral = galaxies[galaxies["sern"] < 2]
+        elliptic = galaxies[galaxies["sern"] > 2]
+
+        self.ba = [
+            BayesianApproximation2d(PDF.from_samples(np.linspace(0, 1, 100), spiral["ba"])),
+            BayesianApproximation2d(PDF.from_samples(np.linspace(0, 1, 100), elliptic["ba"]))
+        ]
+        self.ready = [False, False]
+    
+    def sample_pos_inc(self, galaxy, N):
+        if not self.ready[galaxy["e_class"]]:
+            self.ba[galaxy["e_class"]].run()
+            self.ready[galaxy["e_class"]] = True
+        
+        return self.ba[galaxy["e_class"]].sample_pos_inc(
+            galaxy["ba"],
+            galaxy["pos"]/180*np.pi
+        )
+
+
 class Global1dApproximator:
     def __init__(self):
         galaxies = pd.read_csv("data/intermediate/galaxies.csv")

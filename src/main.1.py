@@ -27,6 +27,8 @@ if method == "global":
     approximator = GlobalApproximator()
 elif method == "global1d":
     approximator = Global1dApproximator()
+elif method == "sern":
+    approximator = SernApproximator()
 elif method == "rf":
     approximator = RandomForestApproximator()
 elif method == "rf1d":
