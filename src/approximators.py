@@ -69,15 +69,14 @@ class GlobalApproximator:
         self.ba = BayesianApproximation2d(q_pdf)
         self.ready = False
     
-    def sample_pos_inc(self, galaxy, N):
+    def sample_pos_inc(self, galaxy):
         if not self.ready:
             self.ba.run()
             self.ready = True
         
         return self.ba.sample_pos_inc(
             galaxy["ba"],
-            galaxy["pos"]/180*np.pi,
-            N
+            galaxy["pos"]/180*np.pi
         )
 
 
@@ -122,8 +121,7 @@ class RandomForestApproximator:
 
         return ba.sample_pos_inc(
             galaxy["ba"],
-            galaxy["pos"]/180*np.pi,
-            N
+            galaxy["pos"]/180*np.pi
         )
 
 
@@ -169,8 +167,7 @@ class KMeansApproximator:
         
         return self.ba[g_class].sample_pos_inc(
             galaxy["ba"],
-            galaxy["pos"]/180*np.pi,
-            N
+            galaxy["pos"]/180*np.pi
         )
 
 
@@ -215,8 +212,7 @@ class RydenApproximator:
     def sample_pos_inc(self, galaxy, N):
         return self.ba.sample_pos_inc(
             galaxy["ba"],
-            galaxy["pos"]/180*np.pi,
-            N
+            galaxy["pos"]/180*np.pi
         )
 
 
@@ -235,6 +231,5 @@ class BoschVenApproximator:
     def sample_pos_inc(self, galaxy, N):
         return self.ba.sample_pos_inc(
             galaxy["ba"],
-            galaxy["pos"]/180*np.pi,
-            N
+            galaxy["pos"]/180*np.pi
         )

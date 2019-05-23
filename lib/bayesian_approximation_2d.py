@@ -78,19 +78,19 @@ class BayesianApproximation2d:
             self.generate_posterior_xz_kde(*method)
     
     @classmethod
-    def sample_pos_inc(self, q, p, N, bw=0.005):
-        q_sample, xi, zeta, theta, phi = self.sample(1000000)
+    def sample_pos_inc(self, q, p, N=1000000, bw=0.005):
+        q_sample, xi, zeta, theta, phi = self.sample(N)
         sample = (q_sample > (q - bw)) & (q_sample < (q + bw))
         
-        kde = stats.kde.gaussian_kde(np.column_stack((
-            xi[sample], zeta[sample], theta[sample], phi[sample]
-        )).T, 0.025)
+        #kde = stats.kde.gaussian_kde(np.column_stack((
+        #    xi[sample], zeta[sample], theta[sample], phi[sample]
+        #)).T, 0.025)
 
-        xi, zeta, theta, phi = kde.resample(N)
+        #xi, zeta, theta, phi = kde.resample(N)
         #xi[xi < 0] = -xi[xi < 0]
         #zeta[zeta > 1] = 2 - zeta[zeta > 1]
 
         return (
-            p - get_psi(xi, zeta, theta, phi),
-            np.cos(theta)
+            p - get_psi(xi[sample], zeta[sample], theta[sample], phi[sample]),
+            np.cos(theta[sample])
         )

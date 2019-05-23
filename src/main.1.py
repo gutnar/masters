@@ -57,30 +57,38 @@ elif method == "bosch_ven":
 #%%
 def process_galaxies(galaxies):
     j = [0, 0]
+    weights = [
+        np.zeros(sum(galaxies[c["parameter"]] == c["value"])) for c in galaxy_classes
+    ]
     hists = [
         np.zeros((sum(galaxies[c["parameter"]] == c["value"]), len(dum_bins) - 1)) for c in galaxy_classes
     ]
     
     for i, galaxy in galaxies.iterrows():
         pos, inc = approximator.sample_pos_inc(galaxy, samples_per_galaxy)
+        N = len(pos)
 
         galaxy_hist = np.histogram(np.concatenate(get_dum(
-            np.repeat(galaxy["ra"], samples_per_galaxy),
-            np.repeat(galaxy["dec"], samples_per_galaxy),
+            np.repeat(galaxy["ra"], N),
+            np.repeat(galaxy["dec"], N),
             pos,
             inc,
-            np.repeat(galaxy["gama"], samples_per_galaxy),
-            np.repeat(galaxy["ex"], samples_per_galaxy),
-            np.repeat(galaxy["ey"], samples_per_galaxy),
-            np.repeat(galaxy["ez"], samples_per_galaxy)
-        )), dum_bins)[0]
+            np.repeat(galaxy["gama"], N),
+            np.repeat(galaxy["ex"], N),
+            np.repeat(galaxy["ey"], N),
+            np.repeat(galaxy["ez"], N)
+        )), dum_bins, density=True)[0]
 
         for c in range(len(galaxy_classes)):
             if galaxy[galaxy_classes[c]["parameter"]] == galaxy_classes[c]["value"]:
+                weights[c][j[c]] = N
                 hists[c][j[c],:] = galaxy_hist
                 j[c] += 1
 
-    return hists
+    return {
+        "weights": weights,
+        "hists": hists
+    }
 
 #%%
 if __name__ == "__main__":
@@ -103,13 +111,16 @@ if __name__ == "__main__":
     start = time()
 
     for c, galaxy_class in enumerate(galaxy_classes):
+        weight = []
         hist = []
 
         for process in range(processes):
-            hist += list(hist_raw[process][c])
+            weight += list(hist_raw[process]["weights"][c])
+            hist += list(hist_raw[process]["hists"][c])
         
+        weight = np.array(weight) / np.sum(weight)
         hist = np.array(hist)
-        print(hist.shape)
+        print(weight.shape, hist.shape, np.sum(weight))
 
         if len(hist) == 0:
             continue
@@ -118,14 +129,17 @@ if __name__ == "__main__":
         hist_std = []
 
         for i in range(len(dum_bins) - 1):
-            i_means = [np.mean(np.random.choice(hist[:,i], hist.shape[0])) for j in range(bootstrap_count)]
+            i_means = [
+                np.mean(np.random.choice(hist[:,i], hist.shape[0], p=weight))
+                for j in range(bootstrap_count)
+            ]
 
             hist_mean.append(np.mean(i_means))
             hist_std.append(np.std(i_means))
         
-        results["%s_mean" % galaxy_class["label"]] = np.array(hist_mean) / samples_per_galaxy / 2 * (len(dum_bins) - 1)
-        results["%s_std" % galaxy_class["label"]] = np.array(hist_std) / samples_per_galaxy / 2 * (len(dum_bins) - 1)
+        results["%s_mean" % galaxy_class["label"]] = np.array(hist_mean)
+        results["%s_std" % galaxy_class["label"]] = np.array(hist_std)
 
     print(time() - start)
 
-    results.to_csv("data/final/%s_quantiles.1.csv" % method, index=False)
+    results.to_csv("data/final/%s_quantiles.csv" % method, index=False)

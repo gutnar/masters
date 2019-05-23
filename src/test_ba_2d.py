@@ -42,32 +42,24 @@ plot_xz_kde(ba)
 #plt.savefig("plots/xi_zeta_intial_kde.pdf", dpi=1000, bbox_inches='tight')#, pad_inches=0)
 
 #%%
-pos, inc = ba.sample_pos_inc(0.1, 0.5, 50000)
+pos, inc = ba.sample_pos_inc(0.1, 0.5)
 
 #plt.hist(np.abs(pos), 100, label="pos", histtype="step")
-plt.hist(np.abs(inc), 100, label="inc", histtype="step")
+plt.hist(np.abs(inc), 100, (0, 1), label="inc", histtype="step")
 
 plt.legend()
 
 #%%
-q = 0.95
+q = 0.05
 bw = 0.005
 
 q_sample, xi, zeta, theta, phi = ba.sample(1000000)
 sample = (q_sample > (q - bw)) & (q_sample < (q + bw))
 
-kde = stats.kde.gaussian_kde(np.column_stack((
-    #xi, zeta, theta, phi
-    xi[sample], zeta[sample], theta[sample], phi[sample]
-)).T, 0.025)
-
-xi2, zeta2, theta2, phi2 = kde.resample(5000)
-#xi2[xi2 < 0] = -xi2[xi2 < 0]
-
 plt.hist(xi[sample], 100, label="xi", histtype="step")
 plt.hist(zeta[sample], 100, label="zeta", histtype="step")
 plt.hist(np.abs(np.cos(theta[sample])), 100, label="theta", histtype="step")
-#plt.hist(theta2/np.pi, 100, label="theta", histtype="step")
+
 plt.legend()
 
 #%%
