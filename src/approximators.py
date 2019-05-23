@@ -93,11 +93,13 @@ class SernApproximator:
         self.ready = [False, False]
     
     def sample_pos_inc(self, galaxy, N):
-        if not self.ready[galaxy["e_class"]]:
-            self.ba[galaxy["e_class"]].run()
-            self.ready[galaxy["e_class"]] = True
+        e_class = int(galaxy["e_class"])
+
+        if not self.ready[e_class]:
+            self.ba[e_class].run()
+            self.ready[e_class] = True
         
-        return self.ba[galaxy["e_class"]].sample_pos_inc(
+        return self.ba[e_class].sample_pos_inc(
             galaxy["ba"],
             galaxy["pos"]/180*np.pi
         )
