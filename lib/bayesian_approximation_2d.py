@@ -26,9 +26,10 @@ class BayesianApproximation2d:
     @classmethod
     def sample(self, N, validate=True):
         xi, zeta = self.xz_kde.resample(N)
+        xi[xi < 0] = -xi[xi < 0]
 
         if validate:
-            valid = (xi > 0) & (xi < zeta) & (zeta < 1)
+            valid = (xi > 0) & (xi < zeta) & (zeta > 0.5) & (zeta < 1)
             xi = xi[valid]
             zeta = zeta[valid]
             N = len(xi)
@@ -84,9 +85,11 @@ class BayesianApproximation2d:
         
         kde = stats.kde.gaussian_kde(np.column_stack((
             xi[sample], zeta[sample], theta[sample], phi[sample]
-        )).T)
+        )).T, 0.025)
 
         xi, zeta, theta, phi = kde.resample(N)
+        #xi[xi < 0] = -xi[xi < 0]
+        #zeta[zeta > 1] = 2 - zeta[zeta > 1]
 
         return (
             p - get_psi(xi, zeta, theta, phi),

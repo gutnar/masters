@@ -43,34 +43,10 @@ predicted_pdf = PDF.from_samples(
 plt.plot(predicted_pdf.x, predicted_pdf.y)
 
 #%%
-for m in np.linspace(0, 1, 10):
-    xi = np.concatenate((
-        np.random.normal(0.222, 0.057, int(10000*(1 - m))),
-        np.random.normal(0.7, 0.1, int(10000*m))
-    ))
-
-    #xi = []
-    zeta = np.random.normal(0.85, 0.1, len(xi))
-
-    #for i in range(int(10000*(1 - m))):
-    #    xi.append(get_truncnorm_sample(0.222, 0.057, 0, zeta[i], 1)[0])
-    
-    #for i in range(len(xi), len(zeta)):
-    #    xi.append(get_truncnorm_sample(0.7, 0.1, 0, zeta[i], 1)[0])
-
-    xz_kde = stats.kde.gaussian_kde(np.column_stack((np.array(xi), zeta)).T)
-
-    ba = BayesianApproximation2d(predicted_pdf, xz_kde)
-    #ba.run([(1000, "scott")]*25)
-
-    print(m, ba.error(1000))
-
-plot_ba_2d_results(ba)
-
-#%%
-ba = BayesianApproximation2d(predicted_pdf)
+ba = BayesianApproximation2d(q_pdf)
 ba.run()
 
+#%%
 plot_ba_2d_results(ba)
 
 #%%
@@ -79,11 +55,56 @@ plot_xz_kde(ba)
 #plt.savefig("plots/xi_zeta_intial_kde.pdf", dpi=1000, bbox_inches='tight')#, pad_inches=0)
 
 #%%
-pos, inc = ba.sample_pos_inc(0.9, 0, 10000)
+pos, inc = ba.sample_pos_inc(0.9, 0, 5000, 0.001)
 
 plt.hist(pos, 100, label="pos")
 plt.hist(inc, 100, label="inc")
 
+plt.legend()
+
+#%%
+q = 0.95
+bw = 0.001
+
+q_sample, xi, zeta, theta, phi = ba.sample(1000000)
+sample = (q_sample > (q - bw)) & (q_sample < (q + bw)) & (zeta > 0.5)
+
+kde = stats.kde.gaussian_kde(np.column_stack((
+    xi, zeta, theta, phi
+    #xi[sample], zeta[sample], theta[sample], phi[sample]
+)).T)
+
+xi, zeta, theta, phi = kde.resample(5000)
+#xi[xi < 0] = -xi[xi < 0]
+#zeta[zeta > 1] = 2 - zeta[zeta > 1]
+
+#xi[xi > zeta] = 2*zeta[xi > zeta] - xi[xi > zeta]
+#xi[xi > 1] = 2 - xi[xi > 1]
+#zeta[zeta < 0] = -zeta[zeta < 0]
+
+#plt.hist(xi, 100, label="xi", histtype="step")
+#plt.hist(zeta, 100, label="zeta", histtype="step")
+plt.hist(np.abs(np.cos(theta)), 100, label="theta", histtype="step")
+#plt.hist(phi, 100, label="phi", histtype="step")
+plt.legend()
+
+#%%
+q = 0.5
+bw = 0.005
+
+q_sample, xi, zeta, theta, phi = ba.sample(1000000)
+sample = (q_sample > (q - bw)) & (q_sample < (q + bw)) & (zeta > 0.5)
+
+kde = stats.kde.gaussian_kde(np.column_stack((
+    #xi, zeta, theta, phi
+    xi[sample], zeta[sample], theta[sample], phi[sample]
+)).T, 0.025)
+
+xi2, zeta2, theta2, phi2 = kde.resample(5000)
+#xi2[xi2 < 0] = -xi2[xi2 < 0]
+
+plt.hist(np.abs(np.cos(theta2)), 100, label="theta", histtype="step")
+#plt.hist(theta2/np.pi, 100, label="theta", histtype="step")
 plt.legend()
 
 #%%
