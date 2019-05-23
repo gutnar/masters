@@ -69,7 +69,7 @@ class GlobalApproximator:
         self.ba = BayesianApproximation2d(q_pdf)
         self.ready = False
     
-    def sample_pos_inc(self, galaxy):
+    def sample_pos_inc(self, galaxy, N):
         if not self.ready:
             self.ba.run()
             self.ready = True

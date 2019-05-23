@@ -17,14 +17,11 @@ def plot_result(method, c, label=""):
     plt.plot(table["dum_mean"], mean, label=label)
     plt.fill_between(table["dum_mean"], mean - std, mean + std, alpha=.5)
 
-#%%
-plot_result("random", 0)
-
 #%% global spiral results
 plt.ylim((0.6, 1.4))
 plot_result("random", 0)
 plot_result("spiral_pos", 0)
-plot_result("global", 0)
+#plot_result("global", 0)
 
 #%% global elliptic results
 plt.ylim((0.6, 1.4))
