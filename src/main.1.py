@@ -47,10 +47,6 @@ elif method == "kmeans":
     approximator = KMeansApproximator()
 elif method == "kmeans1d":
     approximator = KMeans1dApproximator()
-elif method == "kmeans_scott":
-    approximator = KMeansApproximator([(150000, "scott")]*50)
-elif method == "rf_scott":
-    approximator = RandomForestApproximator([150000, "scott"]*50)
 elif method == "ryden":
     approximator = RydenApproximator()
 elif method == "bosch_ven":
@@ -58,7 +54,7 @@ elif method == "bosch_ven":
 
 #%%
 def process_galaxies(galaxies):
-    j = [0, 0]
+    j = [0] * len(galaxy_classes)
     weights = [
         np.zeros(sum(galaxies[c["parameter"]] == c["value"])) for c in galaxy_classes
     ]

@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from src.common import dum_bins, galaxy_classes
+from src.common import galaxy_classes
 from src.tex_plot import savefig
 
 
@@ -18,6 +18,14 @@ def plot_result(method, c, label=""):
     plt.ylabel("$\\rho(|\\vec{n} \cdot \\vec{\\omega}|)$", rotation=0, labelpad=25)
     plt.plot(table["dum_mean"], mean, label=label)
     plt.fill_between(table["dum_mean"], mean - std, mean + std, alpha=.5)
+
+#%% global spiral results
+plt.ylim((0.6, 1.4))
+#plot_result("random", 2, "Juhuslikud nurgad")
+plot_result("spiral_pos", 2, "Ketta lähendus")
+#plot_result("sern", 2, "Ellipsoidi lähendus")
+plt.legend(frameon=False)
+#savefig("plots/results_spiral.pdf")
 
 #%% global spiral results
 plt.ylim((0.6, 1.4))
