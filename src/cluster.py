@@ -9,6 +9,8 @@ from lib import PDF, BayesianApproximation2d
 from lib.plotting import *
 from src.common import n_clusters
 
+n_clusters = 8
+
 #%%
 galaxies = pd.read_csv("data/raw/data_gama_gal_orient.txt", r"\s+")
 e_spiral = pd.read_csv("data/raw/gama_spiral.txt", r"\s+")
@@ -95,7 +97,7 @@ galaxies.to_csv("data/intermediate/galaxies.csv", index=False)
 filament_galaxies.to_csv("data/intermediate/filament_galaxies.csv", index=False)
 
 #%% TEST
-test = pd.read_csv("data/intermediate/filament_galaxies.csv")
+test = pd.read_csv("data/intermediate/galaxies.csv")
 
 p = []
 N = []
@@ -103,6 +105,6 @@ N = []
 for i in range(n_clusters):
     cluster = test[test["g_class"] == i]
     q_pdf = PDF.from_samples(np.linspace(0, 1, 100), cluster["ba"])
-    plt.plot(q_pdf.x, q_pdf.y)
+    plt.plot(q_pdf.x, q_pdf.y, label=str(i) + ": " + str(len(cluster)))
 
 plt.legend()

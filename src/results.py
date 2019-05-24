@@ -25,27 +25,33 @@ def plot_result(method, c, label=""):
     plt.fill_between(dum, mean - std, mean + std, alpha=.5)
 
 #%% global spiral results
-plt.ylim((0.6, 1.4))
-plot_result("random", 0, "Juhuslikud nurgad")
-plot_result("spiral_pos", 0, "Ketta lähendus")
+plt.ylim((0.7, 1.3))
+plot_result("random", 0, "Suvaliselt orienteeritud")
+plot_result("ba", 0, "Õhukese ketta lähendus")
 plot_result("sern", 0, "Ellipsoidi lähendus")
 plt.legend(frameon=False)
-savefig("plots/results_spiral.pdf")
+savefig("plots/results_sern_spiral.pdf")
 
 #%% global elliptic results
-plt.ylim((0.6, 1.4))
-plot_result("random", 1, "Juhuslikud nurgad")
-plot_result("elliptic_pos", 1, "Ketta lähendus")
+plt.ylim((0.7, 1.3))
+plot_result("random", 1, "Suvaliselt orienteeritud")
+plot_result("ba", 1, "Õhukese ketta lähendus")
 plot_result("sern", 1, "Ellipsoidi lähendus")
 plt.legend(frameon=False)
-savefig("plots/results_elliptic.pdf")
+savefig("plots/results_sern_elliptic.pdf")
 
 #%% rf spiral results
-plt.ylim((0.9, 1.1))
-plot_result("random", 0)
-plot_result("rf", 0)
+plt.ylim((0.7, 1.3))
+plot_result("random", 0, "Suvaliselt orienteeritud")
+plot_result("ba", 0, "Õhukese ketta lähendus")
+plot_result("rf", 0, "Ellipsoidi lähendus")
+plt.legend(frameon=False)
+savefig("plots/results_rf_spiral.pdf")
 
 #%% rf elliptic results
-plt.ylim((0.9, 1.1))
+plt.ylim((0.7, 1.3))
 plot_result("random", 1)
+plot_result("ba", 1)
 plot_result("rf", 1)
+plt.legend(frameon=False)
+savefig("plots/results_rf_elliptic.pdf")
