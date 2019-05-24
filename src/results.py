@@ -14,18 +14,15 @@ def plot_result(method, c, label=""):
     mean = table["%s_mean" % galaxy_class["label"]]
     std = table["%s_std" % galaxy_class["label"]] * 1.96
 
+    dum = table["dum_mean"].values
+    dum[0] = 0
+    dum[-1] = 1
+
+    plt.xlim((0, 1))
     plt.xlabel("$|\\vec{n} \cdot \\vec{\\omega}|$")
     plt.ylabel("$\\rho(|\\vec{n} \cdot \\vec{\\omega}|)$", rotation=0, labelpad=25)
-    plt.plot(table["dum_mean"], mean, label=label)
-    plt.fill_between(table["dum_mean"], mean - std, mean + std, alpha=.5)
-
-#%% global spiral results
-plt.ylim((0.6, 1.4))
-#plot_result("random", 2, "Juhuslikud nurgad")
-plot_result("spiral_pos", 2, "Ketta lähendus")
-#plot_result("sern", 2, "Ellipsoidi lähendus")
-plt.legend(frameon=False)
-#savefig("plots/results_spiral.pdf")
+    plt.plot(dum, mean, label=label)
+    plt.fill_between(dum, mean - std, mean + std, alpha=.5)
 
 #%% global spiral results
 plt.ylim((0.6, 1.4))

@@ -2,6 +2,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import scipy.stats as stats
+import statsmodels.api as sm
 
 from lib import PDF, Classifier, BayesianApproximation2d
 from lib.plotting import *
@@ -50,9 +51,7 @@ elliptic_ba.run()
 plot_ba_2d_results2(elliptic_ba)
 
 #%%
-import statsmodels.api as sm
-
-def plot_ba_2d_results2(ba, label, size=150000):
+def plot_results(ba, label, size=150000):
     q, xi, zeta, theta, phi = ba.sample(size)
     
     q_kde = sm.nonparametric.KDEUnivariate(q)
@@ -61,13 +60,15 @@ def plot_ba_2d_results2(ba, label, size=150000):
     
     color = next(plt.gca()._get_lines.prop_cycler)['color']
 
+    plt.xlabel("$q$")
+    plt.ylabel("$\\rho(q)$", rotation=0, labelpad=15)
     plt.plot(ba.q_pdf.x, ba.q_pdf.y, "x", alpha=0.5, color=color)
     plt.plot(ba.q_pdf.x, q_pdf, label=label, color=color)
 
-plt.xlabel("$q$")
-plt.ylabel("$\\rho(q)$", rotation=0, labelpad=15)
-plot_ba_2d_results2(spiral_ba, "Spiraalsed galaktikad")
-plot_ba_2d_results2(elliptic_ba, "Elliptilised galaktikad")
+#%%
+plot_results(spiral_ba, "Spiraalsed galaktikad")
+plot_results(elliptic_ba, "Elliptilised galaktikad")
+
 plt.legend(frameon=False)
 
 savefig("plots/spiral_elliptic_fits.pdf")
@@ -126,46 +127,30 @@ savefig("plots/xi_zeta_spiral.pdf")
 plot_xz_kde(elliptic_ba, False)
 savefig("plots/xi_zeta_elliptic.pdf")
 
-#%%
-pos, inc = ba.sample_pos_inc(0.1, 0.5)
-
-#plt.hist(np.abs(pos), 100, label="pos", histtype="step")
-plt.hist(np.abs(inc), 100, (0, 1), label="inc", histtype="step")
-
-plt.legend()
 
 #%%
-q = 1
-bw = 0.005
+train_galaxies = pd.read_csv("data/intermediate/train_galaxies.csv")
+test_galaxies = pd.read_csv("data/intermediate/test_galaxies.csv")
 
-q_sample, xi, zeta, theta, phi = ba.sample(1000000)
-sample = (q_sample > (q - bw)) & (q_sample < (q + bw))
+len(train_galaxies), len(test_galaxies)
 
-#plt.hist(xi[sample], 100, label="xi", histtype="step")
-#plt.hist(zeta[sample], 100, label="zeta", histtype="step")
-#plt.hist(np.abs(np.cos(theta[sample])), 100, label="theta", histtype="step")
-plt.hist(np.abs(phi[sample] / np.pi), 100, label="phi", histtype="step")
-
-plt.legend()
+#%% Manual fit
+classifier = Classifier()
+classifier.fit(train_galaxies)
+classifier.evaluate(train_galaxies), classifier.evaluate(test_galaxies)
 
 #%%
-from lib.binney import get_q
+names = ["A", "B", "C"]
 
-plt.hist(get_q(xi2, zeta2, theta2, phi2), 100, histtype="step", label="2")
-plt.hist(get_q(xi[sample], zeta[sample], theta[sample], phi[sample]), 100, histtype="step", label="1")
-plt.legend()
+for i, j in enumerate((10, 80, 1210)):
+    predicted_pdf = classifier.predict_pdf(test_galaxies.iloc[[j]])
+    ba = BayesianApproximation2d(predicted_pdf)
+    ba.run()
 
-#%%
-plot_q_theta_kde(ba)
+    plot_results(ba, "Galaktika %s" % names[i])
 
-#%%
-plot_q_phi_kde(ba)
+plt.xlabel("$q$")
+plt.ylabel("$\\rho(q)$", rotation=0)
+plt.legend(frameon=False)
 
-#%%
-plot_pos_inc_kde(ba, 1, np.pi/4)
-
-#%%
-q, xi, zeta, theta, phi = ba.sample(10000)
-
-#%%
-plot_kde(ba.xz_kde, XZ_GRID)
+savefig("plots/random_fits.pdf")
