@@ -95,14 +95,14 @@ galaxies.to_csv("data/intermediate/galaxies.csv", index=False)
 filament_galaxies.to_csv("data/intermediate/filament_galaxies.csv", index=False)
 
 #%% TEST
-test = pd.read_csv("data/intermediate/galaxies.csv")
+test = pd.read_csv("data/intermediate/filament_galaxies.csv")
 
 p = []
 N = []
 
 for i in range(n_clusters):
     cluster = test[test["g_class"] == i]
-    q_pdf = PDF.from_samples(np.linspace(0, 20, 100), cluster["sern"])
+    q_pdf = PDF.from_samples(np.linspace(0, 1, 100), cluster["ba"])
     plt.plot(q_pdf.x, q_pdf.y)
 
 plt.legend()

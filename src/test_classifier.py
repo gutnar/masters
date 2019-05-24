@@ -104,7 +104,7 @@ p1[10] - p2[10]
 classifier.clf.feature_importances_
 
 #%%
-def compare_hist(parameter, cuts):
+def compare_hist(parameter, cuts, name):
     quantiles = pd.qcut(test_galaxies[parameter], cuts, labels=False)
     median = np.median(test_galaxies[parameter])
 
@@ -113,9 +113,9 @@ def compare_hist(parameter, cuts):
         color = next(plt.gca()._get_lines.prop_cycler)['color']
 
         if i == 0:
-            label = "$\\mathrm{%s} < %.2f$" % (parameter, median)
+            label = "$%s < %.2f$" % (name, median)
         else:
-            label = "$\\mathrm{%s} > %.2f$" % (parameter, median)
+            label = "$%s > %.2f$" % (name, median)
         
         plt.plot(np.linspace(0, 1, classifier.q_slot_multiplier, endpoint=False) + 1/2/classifier.q_slot_multiplier, hist, 'o', color=color)
         predicted_pdf = np.sum(classifier.clf.predict_proba(
@@ -133,19 +133,19 @@ def compare_hist(parameter, cuts):
 plt.rcParams.update({ 'font.size': 22 })
 
 #%%
-compare_hist("sern", (0, 0.5, 1))
+compare_hist("sern", (0, 0.5, 1), "\\mathrm{sern}")
 
 #%%
-compare_hist("rabsmag", (0, 0.5, 1))
+compare_hist("rabsmag", (0, 0.5, 1), "\\mathrm{absmag}_\\mathrm{r}")
 
 #%%
-compare_hist("rad", (0, 0.5, 1))
+compare_hist("rad", (0, 0.5, 1), "\\mathrm{rad}")
 
 #%%
-compare_hist("rmag", (0, 0.5, 1))
+compare_hist("rmag", (0, 0.5, 1), "\\mathrm{rad}_\\mathrm{r}")
 
 #%%
-compare_hist("redshift", (0, 0.5, 1))
+compare_hist("redshift", (0, 0.5, 1), "\\mathrm{redshift}")
 
 #%%
 names = ["A", "B", "C"]
