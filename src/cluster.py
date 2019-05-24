@@ -9,8 +9,6 @@ from lib import PDF, BayesianApproximation2d
 from lib.plotting import *
 from src.common import n_clusters
 
-n_clusters = 8
-
 #%%
 galaxies = pd.read_csv("data/raw/data_gama_gal_orient.txt", r"\s+")
 e_spiral = pd.read_csv("data/raw/gama_spiral.txt", r"\s+")
